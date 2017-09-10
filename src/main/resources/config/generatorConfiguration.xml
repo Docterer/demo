@@ -23,7 +23,7 @@
 		</plugin>
 
 		<!-- 数据库地址 -->
-		<jdbcConnection driverClass="com.mysql.jdbc.Driver"
+		<jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
 			connectionURL="jdbc:mysql://127.0.0.1:3306/db_demo?serverTimezone=UTC"
 			userId="root" password="123456">
 		</jdbcConnection>
