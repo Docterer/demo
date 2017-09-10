@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+"http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<!-- 配置生成器 -->
+<generatorConfiguration>
+	<context id="demo" defaultModelType="hierarchical"
+		targetRuntime="MyBatis3Simple">
+		<!-- 处理关键字，坦白讲这个我用不着，反正肯定不会用关键字的 -->
+		<property name="autoDelimitKeywords" value="false" />
+		<!-- 生成的Java文件的编码 -->
+		<property name="javaFileEncoding" value="UTF-8" />
+		<!-- 格式化java代码 -->
+		<property name="javaFormatter"
+			value="org.mybatis.generator.api.dom.DefaultJavaFormatter" />
+		<!-- 格式化XML代码 -->
+		<property name="xmlFormatter"
+			value="org.mybatis.generator.api.dom.DefaultXmlFormatter" />
+
+		<!-- 数据库里的起始符 -->
+		<property name="beginningDelimiter" value="`" />
+		<property name="endingDelimiter" value="`" />
+
+		<!-- 数据库地址 -->
+		<jdbcConnection driverClass="com.mysql.jdbc.Driver"
+			connectionURL="jdbc:mysql://127.0.0.1:3306/db_demo?serverTimezone=UTC" userId="root"
+			password="123456">
+		</jdbcConnection>
+
+		<!-- 强制BigDecimal -->
+		<javaTypeResolver
+			type="org.mybatis.generator.internal.types.JavaTypeResolverDefaultImpl">
+			<property name="forceBigDecimals" value="false" />
+		</javaTypeResolver>
+
+		<!-- model -->
+		<javaModelGenerator targetPackage="com.jojo.ssm.model" targetProject="src/main/java">
+			<!-- 设置是否在getter方法中，对String类型字段调用trim()方法 -->
+			<property name="trimStrings" value="true" />
+		</javaModelGenerator>
+
+
+		<!-- mapper.xml -->
+		<sqlMapGenerator targetPackage="com.jojo.ssm.mapper" targetProject="src/main/resources">
+		</sqlMapGenerator>
+		
+		<!-- mapper接口 -->
+		<javaClientGenerator targetPackage="com.jojo.ssm.mapper" type="XMLMAPPER" targetProject="src/main/java">
+		</javaClientGenerator>
+
+		<table schema="db_demo"  tableName="av_actress" domainObjectName="AvActress">
+			<property name="useActualColumnNames" value="false" />
+		</table>
+	</context>
+</generatorConfiguration>
