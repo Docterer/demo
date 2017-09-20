@@ -11,9 +11,4 @@ public class HttpClientUtil {
 		logger.error("fuck");
 	}
 	
-	public static void main(String[] args) {
-		
-		HttpClientUtil clientUtil = new HttpClientUtil();
-		clientUtil.testLogger();
-	}
 }
