@@ -19,7 +19,6 @@ public class DateUtil {
 	public static String timestamp2Date(String timestamp, String format) {
 		long temp = NumberUtils.toLong(timestamp) * 1000L;
 		Date date = new Date(temp);
-
 		if (StringUtils.isBlank(format)) {
 			format = "yyyy-MM-dd HH:mm:ss";
 		}
@@ -27,10 +26,4 @@ public class DateUtil {
 		return sdf.format(date);
 	}
 
-	public static void main(String[] args) {
-		String now = String.valueOf(System.currentTimeMillis() / 1000L);
-		String future = String.valueOf((System.currentTimeMillis() + (24 * 60 * 60 * 1000)) / 1000L);
-		System.out.println(timestamp2Date(now, null));
-		System.out.println(timestamp2Date(future, null));
-	}
 }

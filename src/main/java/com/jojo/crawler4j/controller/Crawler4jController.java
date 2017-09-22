@@ -8,8 +8,14 @@ import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 
-public class CrawlerController {
-	public static void main(String[] args) throws Exception {
+public class Crawler4jController {
+
+	/**
+	 * ×îÆÕÍ¨µÄÅÀ³æ
+	 * 
+	 * @throws Exception
+	 */
+	public void common() throws Exception {
 		String crawlStorageFolder = "/data/crawl/root";
 		int numberOfCrawlers = 7;
 
@@ -26,5 +32,10 @@ public class CrawlerController {
 		controller.addSeed("http://www.ics.uci.edu/");
 
 		controller.start(TestCrawler.class, numberOfCrawlers);
+	}
+
+	public static void main(String[] args) throws Exception {
+		Crawler4jController controller = new Crawler4jController();
+		controller.common();
 	}
 }
