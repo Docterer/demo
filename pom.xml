@@ -17,6 +17,7 @@
 		<guava.version>23.0</guava.version>
 		<spring.version>4.3.10.RELEASE</spring.version>
 		<poi.version>3.15</poi.version>
+		<spark.version>2.2.0</spark.version>
 		<!-- 编译等级 -->
 		<source.jdk.version>1.8</source.jdk.version>
 		<target.jdk.version>1.8</target.jdk.version>
@@ -79,7 +80,7 @@
 		<dependency><!-- 连接MySQL -->
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>6.0.6</version>
+			<version>5.1.44</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mybatis</groupId>
@@ -185,7 +186,27 @@
 			<artifactId>crawler4j</artifactId>
 			<version>${crawler4j.version}</version>
 		</dependency>
+		<!-- 传说中的大数据 -->
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-core_2.11</artifactId>
+			<version>${spark.version}</version>
+		</dependency>
+		<!-- 权限控制 -->
+		<dependency>
+			<groupId>org.apache.shiro</groupId>
+			<artifactId>shiro-web</artifactId>
+			<version>1.3.2</version>
+		</dependency>
+		<!-- 全文检索，根本就不知道怎么用，依赖都是随便搞的 -->
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>7.0.0</version>
+		</dependency>
+
 	</dependencies>
+
 
 
 
