@@ -98,6 +98,8 @@ public class HttpClientUtil {
 
 	public static final String COLLECTION_MANAGER_TIMEOUT = "http.connection-manager.timeout";
 
+	
+	
 	/****************************** 常用对象 ******************************/
 	private static Logger logger = LoggerFactory.getLogger(HttpClientUtil.class);
 
@@ -123,9 +125,18 @@ public class HttpClientUtil {
 		clientConnectionManager.setDefaultMaxPerRoute(20);
 	}
 	
+	/******************************** 方法区 ************************************/
 	/**
-	 * 获取HttpClient，由连接池管理器提供
-	 * @param timeout TODO
+	 * 获取HttpClient，连接超时时间默认10秒
+	 * @return
+	 */
+	private static HttpClient getHttpClient() {
+		return getHttpClient(10);
+	}
+			
+	/**
+	 * 获取HttpClient，由连接池管理器提供，需要提供超时时间
+	 * @param timeout 
 	 * 
 	 * @return
 	 */
@@ -134,7 +145,6 @@ public class HttpClientUtil {
 		// 从连接池获取
 		clientBuilder.setConnectionManager(clientConnectionManager);
 		// 连接超时设置，默认10秒
-		if(timeout == 0) timeout = 10;
 		Builder configBuilder = RequestConfig.custom();
 		configBuilder.setConnectionRequestTimeout(timeout * 1000);
 		configBuilder.setConnectTimeout(timeout * 1000);
@@ -185,7 +195,7 @@ public class HttpClientUtil {
 			if (StringUtils.isNotEmpty(contentType)) {
 				post.setHeader("Content-Type", contentType);
 			}
-			HttpResponse response = getHttpClient(0).execute(post);
+			HttpResponse response = getHttpClient().execute(post);
 
 			HttpEntity resEntity = response.getEntity();
 			int statusCode = response.getStatusLine().getStatusCode();
@@ -281,7 +291,7 @@ public class HttpClientUtil {
 				}
 			}
 
-			HttpResponse response = getHttpClient(0).execute(get);
+			HttpResponse response = getHttpClient().execute(get);
 			logger.info("response:" + response);
 			HttpEntity resEntity = response.getEntity();
 			int statusCode = response.getStatusLine().getStatusCode();
@@ -475,7 +485,7 @@ public class HttpClientUtil {
 				}
 			}
 
-			HttpResponse response = getHttpClient(0).execute(post);
+			HttpResponse response = getHttpClient().execute(post);
 
 			HttpEntity resEntity = response.getEntity();
 			int statusCode = response.getStatusLine().getStatusCode();
@@ -550,7 +560,7 @@ public class HttpClientUtil {
 				}
 			}
 
-			HttpResponse response = getHttpClient(0).execute(post);
+			HttpResponse response = getHttpClient().execute(post);
 
 			HttpEntity resEntity = response.getEntity();
 			int statusCode = response.getStatusLine().getStatusCode();
@@ -608,7 +618,7 @@ public class HttpClientUtil {
 				UrlEncodedFormEntity reqEntity = new UrlEncodedFormEntity(params, "UTF-8");
 				post.setEntity(reqEntity);
 			}
-			HttpResponse response = getHttpClient(0).execute(post);
+			HttpResponse response = getHttpClient().execute(post);
 			Header[] cookie = response.getHeaders("Set-Cookie");
 
 			int statusCode = response.getStatusLine().getStatusCode();
@@ -658,7 +668,7 @@ public class HttpClientUtil {
 				UrlEncodedFormEntity reqEntity = new UrlEncodedFormEntity(params, "UTF-8");
 				post.setEntity(reqEntity);
 			}
-			HttpResponse response = getHttpClient(0).execute(post);
+			HttpResponse response = getHttpClient().execute(post);
 
 			HttpEntity resEntity = response.getEntity();
 			int statusCode = response.getStatusLine().getStatusCode();
@@ -739,7 +749,7 @@ public class HttpClientUtil {
 			HttpEntity reqEntity = new InputStreamEntity(is, b.length,
 					ContentType.create(ContentType.TEXT_XML.getMimeType(), Charset.forName(charSet)));
 			post.setEntity(reqEntity);
-			httpClient = getHttpClient(0);
+			httpClient = getHttpClient();
 			response = httpClient.execute(post);
 			HttpEntity resEntity = response.getEntity();
 			int statusCode = response.getStatusLine().getStatusCode();
@@ -801,7 +811,7 @@ public class HttpClientUtil {
 				StringEntity myEntity = new StringEntity(json, "UTF-8");
 				post.setEntity(myEntity);
 			}
-			HttpResponse response = getHttpClient(0).execute(post);
+			HttpResponse response = getHttpClient().execute(post);
 
 			HttpEntity resEntity = response.getEntity();
 			int statusCode = response.getStatusLine().getStatusCode();
@@ -849,7 +859,7 @@ public class HttpClientUtil {
 				StringEntity myEntity = new StringEntity(json, charset);
 				post.setEntity(myEntity);
 			}
-			HttpResponse response = getHttpClient(0).execute(post);
+			HttpResponse response = getHttpClient().execute(post);
 
 			HttpEntity resEntity = response.getEntity();
 			int statusCode = response.getStatusLine().getStatusCode();
@@ -950,7 +960,7 @@ public class HttpClientUtil {
 
 			post.setEntity(reqEntity);
 
-			HttpResponse response = getHttpClient(0).execute(post);
+			HttpResponse response = getHttpClient().execute(post);
 			int statusCode = response.getStatusLine().getStatusCode();
 			httpResult.setCode(statusCode);
 			HttpEntity resEntity = response.getEntity();
