@@ -16,16 +16,16 @@ import java.util.regex.Pattern;
 public class RegexUtil {
 	
 	/**
-	 * µİ¹éÄ¿Â¼£¬É¾³ıÎÄ¼şÃûÖĞ·ûºÏÕıÔò±í´ïÊ½µÄ²¿·Ö
+	 * é€’å½’ç›®å½•ï¼Œåˆ é™¤æ–‡ä»¶åä¸­ç¬¦åˆæ­£åˆ™è¡¨è¾¾å¼çš„éƒ¨åˆ†
 	 * 
 	 * @author jojo
 	 * @param fileDirectory
-	 *            ÎÄ¼şÄ¿Â¼
+	 *            æ–‡ä»¶ç›®å½•
 	 * @param regexArray
-	 *            ÕıÔò±í´ïÊ½Êı×é
+	 *            æ­£åˆ™è¡¨è¾¾å¼æ•°ç»„
 	 */
 	public static void fileRename(File fileDirectory, String[] regexArray) {
-		// ÏÈ¸ÄÃû£¬È»ºóµİ¹é
+		// å…ˆæ”¹åï¼Œç„¶åé€’å½’
 		String path = fileDirectory.getAbsolutePath();
 		for (String regex : regexArray) {
 			path = path.replaceAll(regex, "");
@@ -39,37 +39,37 @@ public class RegexUtil {
 		}
 	}
 	
-	/***************************** ´ÓHTML»ñÈ¡´ÅÁ¦Á´ *********************************/
+	/***************************** ä»HTMLè·å–ç£åŠ›é“¾ *********************************/
 	/**
-	 * ´ÓÍøÒ³ÅúÁ¿±£´æÍ¼Æ¬
+	 * ä»ç½‘é¡µæ‰¹é‡ä¿å­˜å›¾ç‰‡
 	 * 
 	 * @param regex
-	 *            ÌáÈ¡Í¼Æ¬µÄÕıÔò±í´ïÊ½
+	 *            æå–å›¾ç‰‡çš„æ­£åˆ™è¡¨è¾¾å¼
 	 * @param htmlUrlArray
-	 *            ÍøÒ³µÄÔ´Â·¾¶
+	 *            ç½‘é¡µçš„æºè·¯å¾„
 	 * @param savePoint
-	 *            ÌáÈ¡Í¼Æ¬ºóµÄ±£´æÄ¿Â¼£¬±ØĞë´æÔÚ
+	 *            æå–å›¾ç‰‡åçš„ä¿å­˜ç›®å½•ï¼Œå¿…é¡»å­˜åœ¨
 	 * @param threadNumber
-	 *            ¹¤×÷Ïß³ÌÊı£¬Ä¬ÈÏ7Ìõ
+	 *            å·¥ä½œçº¿ç¨‹æ•°ï¼Œé»˜è®¤7æ¡
 	 */
 	public static void getPicFromHTML(String regex, String[] htmlUrlArray, String savePoint, int threadNumber) {
 		try {
-			// ËùÓĞÍ¼Æ¬µÄurl
+			// æ‰€æœ‰å›¾ç‰‡çš„url
 			List<String> picUrlList = new ArrayList<String>();
 			for (String htmlUrl : htmlUrlArray) {
 				picUrlList.addAll(getLinkByRegex(regex, htmlUrl));
 			}
 
-			// ·ÖÅä¹¤×÷Á¿£¨ÓĞ´ıÓÅ»¯£©
+			// åˆ†é…å·¥ä½œé‡ï¼ˆæœ‰å¾…ä¼˜åŒ–ï¼‰
 			if (threadNumber == 0 || threadNumber == 1) {
 				threadNumber = 7;
 			}
-			// Æ½¾ù¹¤×÷Á¿
+			// å¹³å‡å·¥ä½œé‡
 			int workload = picUrlList.size() / threadNumber;
-			// É¨Î²¹¤×÷Á¿
+			// æ‰«å°¾å·¥ä½œé‡
 			int workload2 = picUrlList.size() % threadNumber;
 
-			// ¿ªÊ¼¹¤×÷£¬ÏÈÉ¨Î²
+			// å¼€å§‹å·¥ä½œï¼Œå…ˆæ‰«å°¾
 			Worker worker = new Worker(picUrlList.size() - workload2, picUrlList.size(), picUrlList, savePoint);
 			Thread thread = new Thread(worker);
 			thread.start();
@@ -87,7 +87,7 @@ public class RegexUtil {
 	}
 
 	/**
-	 * ¸ù¾İÕıÔò±í´ïÊ½»ñÈ¡ÎÄ¼şÖĞµÄÁ´½Ó£¬»ñÈ¡ÄÚÈİÈ¡¾öÓÚÌá¹©µÄÕıÔò±í´ïÊ½
+	 * æ ¹æ®æ­£åˆ™è¡¨è¾¾å¼è·å–æ–‡ä»¶ä¸­çš„é“¾æ¥ï¼Œè·å–å†…å®¹å–å†³äºæä¾›çš„æ­£åˆ™è¡¨è¾¾å¼
 	 * 
 	 * @param regex
 	 * @param htmlUrl
@@ -98,7 +98,7 @@ public class RegexUtil {
 		List<String> list = new ArrayList<String>();
 		BufferedReader bufferedIn = null;
 		try {
-			// ½«ÍøÒ³ÄÚÈİ¶Á½øÄÚ´æ
+			// å°†ç½‘é¡µå†…å®¹è¯»è¿›å†…å­˜
 			StringBuilder htmlString = new StringBuilder();
 			URL url = new URL(htmlUrl);
 			URLConnection connection = url.openConnection();
@@ -108,14 +108,14 @@ public class RegexUtil {
 				htmlString.append(temp);
 			}
 
-			// ¿ªÊ¼Æ¥Åä
+			// å¼€å§‹åŒ¹é…
 			Pattern p = Pattern.compile(regex);
 			Matcher m = p.matcher(htmlString);
 			while (m.find()) {
 				String str = m.group();
 				list.add(str);
 				/*
-				 * ¼ÓÕâ¸öÎÒºÜÄªÃûÆæÃî£¬µ«²»¼Ó×îºóÕÒ³öÀ´µÄURL±ØÈ»ÖØ¸´Ò»´Î£¬²»ÖªµÀÎªÊ²Ã´
+				 * åŠ è¿™ä¸ªæˆ‘å¾ˆè«åå¥‡å¦™ï¼Œä½†ä¸åŠ æœ€åæ‰¾å‡ºæ¥çš„URLå¿…ç„¶é‡å¤ä¸€æ¬¡ï¼Œä¸çŸ¥é“ä¸ºä»€ä¹ˆ
 				 */
 				m.find();
 			}
@@ -127,7 +127,7 @@ public class RegexUtil {
 }
 
 /**
- * ¹¤×÷Ïß³Ì
+ * å·¥ä½œçº¿ç¨‹
  */
 class Worker implements Runnable {
 
@@ -148,9 +148,9 @@ class Worker implements Runnable {
 	public void run() {
 		try {
 			for (; startNumber < endNumber + 1; startNumber++) {
-				System.out.println("¿ªÊ¼´¦ÀíµÚ" + startNumber + "ÕÅ");
+				System.out.println("å¼€å§‹å¤„ç†ç¬¬" + startNumber + "å¼ ");
 				String realSavePoint = savePoint + File.separator + startNumber + ".jpg";
-				// listµÄË÷Òı´Ó0¿ªÊ¼
+				// listçš„ç´¢å¼•ä»0å¼€å§‹
 				this.savePicToLocal(picUrlList.get(startNumber - 1), realSavePoint);
 			}
 		} catch (Exception e) {
@@ -159,7 +159,7 @@ class Worker implements Runnable {
 	}
 
 	/**
-	 * ¸ù¾İ¸ø¶¨µÄurl´Ó·şÎñÆ÷»ñÈ¡Í¼Æ¬£¬²¢±£´æÔÚÖ¸¶¨Î»ÖÃ¡£×¢Òâ£¬Ö¸¶¨Ä¿Â¼±ØĞë´æÔÚ¡£<br>
+	 * æ ¹æ®ç»™å®šçš„urlä»æœåŠ¡å™¨è·å–å›¾ç‰‡ï¼Œå¹¶ä¿å­˜åœ¨æŒ‡å®šä½ç½®ã€‚æ³¨æ„ï¼ŒæŒ‡å®šç›®å½•å¿…é¡»å­˜åœ¨ã€‚<br>
 	 * 
 	 * @param picUrl
 	 * @param savePoint
@@ -168,7 +168,7 @@ class Worker implements Runnable {
 	public void savePicToLocal(String picUrl, String savePoint) throws Exception {
 		BufferedOutputStream bufferedOut = null;
 		BufferedInputStream bufferedIn = null;
-		// Õâ¸ö try ¿éÖ»ÊÇÎªÁË¹Ø±Õ×ÊÔ´
+		// è¿™ä¸ª try å—åªæ˜¯ä¸ºäº†å…³é—­èµ„æº
 		try {
 			URL url = new URL(picUrl);
 			URLConnection connection = url.openConnection();
@@ -181,7 +181,7 @@ class Worker implements Runnable {
 			}
 			bufferedIn = new BufferedInputStream(connection.getInputStream());
 			bufferedOut = new BufferedOutputStream(new FileOutputStream(file));
-			// ±ØĞëÓÃint£¬²»È»Í¼Æ¬»áÊ§Õæ
+			// å¿…é¡»ç”¨intï¼Œä¸ç„¶å›¾ç‰‡ä¼šå¤±çœŸ
 			int temp = 0;
 			while ((temp = bufferedIn.read()) != -1) {
 				bufferedOut.write(temp);
