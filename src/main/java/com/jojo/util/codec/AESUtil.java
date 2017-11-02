@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.jojo.util;
+package com.jojo.util.codec;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
