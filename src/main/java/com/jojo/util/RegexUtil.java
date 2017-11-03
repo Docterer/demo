@@ -25,11 +25,17 @@ public class RegexUtil {
 	 *            正则表达式数组
 	 */
 	public static void fileRename(File fileDirectory, String[] regexArray) {
+		if(regexArray == null || fileDirectory == null) {
+			System.err.println("参数不得为空");
+			return ;
+		}
+		
 		// 先改名，然后递归
 		String path = fileDirectory.getAbsolutePath();
 		for (String regex : regexArray) {
 			path = path.replaceAll(regex, "");
 		}
+		
 		fileDirectory.renameTo(new File(path));
 
 		if (fileDirectory.isDirectory()) {
