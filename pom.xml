@@ -9,8 +9,6 @@
 	<url>http://maven.apache.org</url>
 
 
-
-
 	<!-- 常规属性 -->
 	<properties>
 		<crawler4j.version>4.3</crawler4j.version>
@@ -21,6 +19,9 @@
 		<!-- 编译等级 -->
 		<source.jdk.version>1.8</source.jdk.version>
 		<target.jdk.version>1.8</target.jdk.version>
+		<!-- 编码设置 -->
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 
@@ -38,7 +39,7 @@
 
 
 		<!-- ########## Web项目主题框架 ########## -->
-		<!-- Servlet & JSP -->
+		<!-- Servlet & JSP Start-->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -56,8 +57,12 @@
 			<artifactId>jstl</artifactId>
 			<version>1.2</version>
 		</dependency>
+		<!-- Servlet & JSP End-->
+		
+		
+		
 
-		<!-- Spring Framework -->
+		<!-- Spring Framework Start -->
 		<!-- mvc框架依赖 spring-context，也依赖spring-web，所以不写了，我是能省就省 -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -67,6 +72,12 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-tx</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<!-- 少了会报java.lang.NoClassDefFoundError -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
 		<!-- 用于支持spring-aop -->
@@ -80,13 +91,31 @@
 			<artifactId>aspectjweaver</artifactId>
 			<version>1.8.10</version>
 		</dependency>
+		<!-- Spring Framework End -->
 
-		<!-- 持久层框架及插件 -->
-		<dependency><!-- 连接MySQL -->
+
+
+
+
+<!--############## 持久层框架及插件 ###############-->
+		<!-- MySQL Connector Start -->
+		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.44</version>
 		</dependency>
+		<!-- MySQL Connector End -->
+		
+		
+		<!-- druid连接池 -->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+		
+		
+		
 		<dependency>
 			<groupId>org.mybatis</groupId>
 			<artifactId>mybatis</artifactId>
@@ -113,16 +142,20 @@
 			<artifactId>pagehelper</artifactId>
 			<version>4.2.1</version>
 		</dependency>
-		<!-- druid连接池 -->
+		
+
+
+		<!-- hibernate-start -->
 		<dependency>
-			<groupId>com.alibaba</groupId>
-			<artifactId>druid</artifactId>
-			<version>1.1.0</version>
+		    <groupId>org.hibernate</groupId>
+		    <artifactId>hibernate-core</artifactId>
+		    <version>5.2.12.Final</version>
 		</dependency>
+		<!-- hibernate-end -->
 
 
 
-		<!-- ############# 工具 ############# -->
+<!-- ############# 工具 ############# -->
 		<!-- 日志，logback依赖于slf4j接口，因此就不写它的dependency了 -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -189,7 +222,12 @@
 			<artifactId>sitemesh</artifactId>
 			<version>3.0.1</version>
 		</dependency>
-		<!-- ############# 打了玩的 ############# -->
+		
+		
+		
+		
+		
+<!-- ############# 打了玩的 ############# -->
 		<!-- 爬虫 -->
 		<dependency>
 			<groupId>edu.uci.ics</groupId>
@@ -214,7 +252,6 @@
 			<artifactId>lucene-core</artifactId>
 			<version>7.0.0</version>
 		</dependency>
-
 	</dependencies>
 
 
@@ -227,8 +264,7 @@
 		<pluginManagement>
 			<plugins>
 				<!-- 不加这个就给我报错，但ecplise里我明明又设置过编译等级，怪事 -->
-				<!-- Dynamic Web Module 3.0 requires Java 1.6 or newer. demo line 1 Maven 
-					Java EE Configuration Problem -->
+				<!-- Dynamic Web Module 3.0 requires Java 1.6 or newer. demo line 1 Maven Java EE Configuration Problem -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>

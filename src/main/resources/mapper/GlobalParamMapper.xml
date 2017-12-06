@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jojo.ssm.mapper.GlobalParamMapper">
+  <resultMap id="BaseResultMap" type="com.jojo.ssm.model.GlobalParam">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="param_key" jdbcType="VARCHAR" property="paramKey" />
+    <result column="param_desc" jdbcType="VARCHAR" property="paramDesc" />
+    <result column="param_value" jdbcType="VARCHAR" property="paramValue" />
+    <result column="param_type" jdbcType="VARCHAR" property="paramType" />
+    <result column="is_build_in" jdbcType="INTEGER" property="isBuildIn" />
+  </resultMap>
+</mapper>

@@ -13,20 +13,32 @@ public class Solution {
 		return count + leftCount + rightCount;
 	}
 
-	public int depth(TreeNode root, int sum) {
+	private int depth(TreeNode root, int sum) {
 		if (root == null && sum == 0) {
 			return 1;
 		} else if (root == null && sum != 0) {
 			return 0;
 		}
-		// 这边只能返回0或1
 		int left = depth(root.left, sum - root.val);
 		int right = depth(root.right, sum - root.val);
 		return left + right;
 	}
 
+	
+	/**
+	 * leetcode 189
+	 * @param nums
+	 * @param k
+	 */
+	public void rotate(int[] nums, int k) {
+       
+    }
+	
+	
+	
 	public static void main(String[] args) {
-		// 构造一棵树
+		Solution solution = new Solution();
+		
 		TreeNode root = new TreeNode(10);
 
 		root.left = new TreeNode(5);
@@ -39,8 +51,7 @@ public class Solution {
 		root.left.left.left = new TreeNode(3);
 		root.left.left.right = new TreeNode(-2);
 		root.left.right.right = new TreeNode(1);
-
-		Solution solution = new Solution();
 		System.out.println(solution.pathSum(root, 8));
+		
 	}
 }

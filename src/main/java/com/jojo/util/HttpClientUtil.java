@@ -1,70 +1,19 @@
 package com.jojo.util;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.io.UnsupportedEncodingException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.net.UnknownHostException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLHandshakeException;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.NoHttpResponseException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpRequestRetryHandler;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.config.RequestConfig.Builder;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HttpClientUtil {
 
-	/************************ ³£Á¿Çø *****************************/
+	/************************ å¸¸é‡åŒº *****************************/
 
 	/**
-	 * ÇëÇó³É¹¦
+	 * è¯·æ±‚æˆåŠŸ
 	 */
 	public static final int OK = 200;
 
@@ -92,26 +41,39 @@ public class HttpClientUtil {
 
 	public static final int TIME_OUT = 60000;
 
-	public static final String SOCKET_TIMEOUT = "http.socket.timeout";
-
-	public static final String COLLECTION_TIMEOUT = "http.connection.timeout";
-
-	public static final String COLLECTION_MANAGER_TIMEOUT = "http.connection-manager.timeout";
-
+	/**
+	 * å›¾ç‰‡æ–‡ä»¶
+	 */
+	public static final String FILE_TYPE_IMAGE = "1";
+	/**
+	 * è§†é¢‘æ–‡ä»¶
+	 */
+	public static final String FILE_TYPE_VEDIO = "2";
+	/**
+	 * éŸ³é¢‘æ–‡ä»¶
+	 */
+	public static final String FILE_TYPE_AUDIO = "3";
+	/**
+	 * å®‰è£…æ–‡ä»¶
+	 */
+	public static final String FILE_TYPE_SETUP = "4";
+	/**
+	 * å‹ç¼©æ–‡ä»¶
+	 */
+	public static final String FILE_TYPE_COMPRESS = "5";
 	
-	
-	/****************************** ³£ÓÃ¶ÔÏó ******************************/
+	/****************************** å¸¸ç”¨å¯¹è±¡ ******************************/
 	private static Logger logger = LoggerFactory.getLogger(HttpClientUtil.class);
 
 	/**
-	 * Á¬½Ó³Ø¹ÜÀíÆ÷
+	 * è¿æ¥æ± ç®¡ç†å™¨
 	 */
 	private static PoolingHttpClientConnectionManager clientConnectionManager;
 
-	private static List<String> monitorHostList = new ArrayList<String>();
-
+	
+	/********************************** é™æ€ä»£ç å—ï¼Œåˆå§‹åŒ–åŒºåŸŸ ***************************************/
 	/**
-	 * ³õÊ¼»¯Á¬½Ó³Ø¹ÜÀíÆ÷
+	 * åˆå§‹åŒ–è¿æ¥æ± ç®¡ç†å™¨
 	 */
 	static {
 		RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.<ConnectionSocketFactory>create();
@@ -119,937 +81,838 @@ public class HttpClientUtil {
 		registryBuilder.register("ssl", SSLConnectionSocketFactory.getSocketFactory());
 
 		clientConnectionManager = new PoolingHttpClientConnectionManager(registryBuilder.build());
-		// ×î´óÁ¬½ÓÊı
+		// æœ€å¤§è¿æ¥æ•°
 		clientConnectionManager.setMaxTotal(200);
-		// Ã¿¸öÂ·ÓÉµÄ»ù´¡Á¬½ÓÊı
+		// æ¯ä¸ªè·¯ç”±çš„åŸºç¡€è¿æ¥æ•°
 		clientConnectionManager.setDefaultMaxPerRoute(20);
 	}
 	
-	/******************************** ·½·¨Çø ************************************/
-	/**
-	 * »ñÈ¡HttpClient£¬Á¬½Ó³¬Ê±Ê±¼äÄ¬ÈÏ10Ãë
-	 * @return
-	 */
-	private static HttpClient getHttpClient() {
-		return getHttpClient(10);
-	}
-			
-	/**
-	 * »ñÈ¡HttpClient£¬ÓÉÁ¬½Ó³Ø¹ÜÀíÆ÷Ìá¹©£¬ĞèÒªÌá¹©³¬Ê±Ê±¼ä
-	 * @param timeout 
-	 * 
-	 * @return
-	 */
-	private static HttpClient getHttpClient(int timeout) {
-		HttpClientBuilder clientBuilder = HttpClients.custom();
-		// ´ÓÁ¬½Ó³Ø»ñÈ¡
-		clientBuilder.setConnectionManager(clientConnectionManager);
-		// Á¬½Ó³¬Ê±ÉèÖÃ£¬Ä¬ÈÏ10Ãë
-		Builder configBuilder = RequestConfig.custom();
-		configBuilder.setConnectionRequestTimeout(timeout * 1000);
-		configBuilder.setConnectTimeout(timeout * 1000);
-		configBuilder.setSocketTimeout(timeout * 1000);
-		clientBuilder.setDefaultRequestConfig(configBuilder.build());
-		
-		// ÇëÇóÖØÊÔ´¦Àí£¬ÖØÊÔ3´Î
-		HttpRequestRetryHandler httpRequestRetryHandler = new HttpRequestRetryHandler() {
-			public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
-				HttpClientContext clientContext = HttpClientContext.adapt(context);
-				HttpRequest request = clientContext.getRequest();
-				// Èç¹ûÇëÇóÊÇÃİµÈµÄ£¬¾ÍÔÙ´Î³¢ÊÔ
-				if (!(request instanceof HttpEntityEnclosingRequest)) { return true; }
-				// Èç¹û·şÎñÆ÷¶ªµôÁËÁ¬½Ó£¬ÄÇÃ´¾ÍÖØÊÔ
-				if (exception instanceof NoHttpResponseException) { return true; }
-				// Èç¹ûÒÑ¾­ÖØÊÔÁË5´Î£¬¾Í·ÅÆú
-				if (executionCount >= 3) { return false; }
-				// ²»ÒªÖØÊÔSSLÎÕÊÖÒì³£
-				if (exception instanceof SSLHandshakeException) { return false; }
-				// ³¬Ê±
-				if (exception instanceof InterruptedIOException) { return false; }
-				// Ä¿±ê·şÎñÆ÷²»¿É´ï
-				if (exception instanceof UnknownHostException) { return false; }
-				// Á¬½Ó±»¾Ü¾ø
-				if (exception instanceof ConnectTimeoutException) { return false; }
-				// sslÎÕÊÖÒì³£
-				if (exception instanceof SSLException) { return false; }
-				// ²»ÊôÓÚÒÔÉÏÇé¿ö£¬²»ÖØÊÔ£¬ÆäÊµÕâ¸ö return Ğ´ÔÚÄÇÁ½¸ötrueºóÃæ¾ÍºÃÁË£¬ÁôÏÂĞ©Òì³£¾Íµ±Ñ§Ï°
-				return false;
-			}
-		};
-		clientBuilder.setRetryHandler(httpRequestRetryHandler);
-		
-		return clientBuilder.build();
-	}
-
-	public static HttpResult doPostContent(String url, String content, String contentType) {
-		HttpResult httpResult = new HttpResult();
-		String result = null;
-		HttpPost post = new HttpPost(url);
-		try {
-
-			if (StringUtils.isNotEmpty(content)) {
-				post.setEntity(new StringEntity(content, "UTF-8"));
-			}
-
-			// ÉèÖÃHeader
-			if (StringUtils.isNotEmpty(contentType)) {
-				post.setHeader("Content-Type", contentType);
-			}
-			HttpResponse response = getHttpClient().execute(post);
-
-			HttpEntity resEntity = response.getEntity();
-			int statusCode = response.getStatusLine().getStatusCode();
-			httpResult.setCode(statusCode);
-
-			Map<String, String> headerMap = new HashMap<String, String>();
-			for (Header header : response.getAllHeaders()) {
-				headerMap.put(header.getName(), header.getValue());
-			}
-			httpResult.setHeaderMap(headerMap);
-
-			if (statusCode != OK) {
-				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
-				post.abort();
-				return httpResult;
-			}
-			if (resEntity != null) {
-				String respBody = EntityUtils.toString(resEntity);
-				try {
-					result = respBody;
-				} catch (Exception e) {
-					logger.error("+++++==> respBody:" + respBody + " <==+++++", e);
-				}
-			}
-		} catch (SocketTimeoutException e) {
-			httpResult.setCode(READ_TIMEOUT);
-			return httpResult;
-		} catch (IOException e) {
-			e.printStackTrace();
-			logger.error("+++++==> doPost:" + url + " <==+++++", e);
-			httpResult.setCode(OTHER_IO_EXCEPTION);
-			return httpResult;
-		} finally {
-			post.releaseConnection();
-		}
-		httpResult.setBody(result);
-		return httpResult;
-	}
-
-	@SuppressWarnings("unused")
-	private static String getCause(int statusCode) {
-		String cause = null;
-		switch (statusCode) {
-		case NOT_MODIFIED:
-			break;
-		case BAD_REQUEST:
-			cause = "The request was invalid.  An accompanying error message will explain why. This is the status code will be returned during rate limiting.";
-			break;
-		case NOT_AUTHORIZED:
-			cause = "Authentication credentials were missing or incorrect.";
-			break;
-		case FORBIDDEN:
-			cause = "The request is understood, but it has been refused.  An accompanying error message will explain why.";
-			break;
-		case NOT_FOUND:
-			cause = "The URI requested is invalid or the resource requested, such as a user, does not exists.";
-			break;
-		case NOT_ACCEPTABLE:
-			cause = "Returned by the Search API when an invalid format is specified in the request.";
-			break;
-		case INTERNAL_SERVER_ERROR:
-			cause = "Something is broken.  Please post to the group so the liushijie can investigate.";
-			break;
-		case BAD_GATEWAY:
-			cause = "image server is down or being upgraded.";
-			break;
-		case SERVICE_UNAVAILABLE:
-			cause = "Service Unavailable: img servers are up, but overloaded with requests. Try again later. The search and trend methods use this to indicate when you are being rate limited.";
-			break;
-		default:
-			cause = "";
-		}
-		return statusCode + ":" + cause;
-	}
-
-	/**
-	 * ¸ù¾İURL·¢ËÍgetÇëÇó»ñÈ¡Êı¾İ
-	 *
-	 * @param url
-	 * @return
-	 */
-	public static HttpResult doGet(String url, Map<String, String> headerMap, int... timeout) {
-		HttpResult httpResult = new HttpResult();
-		long currentTime = System.currentTimeMillis();
-		String result = null;
-		HttpGet get = new HttpGet(url);
-		String host = null;
-		try {
-			host = new URL(url).getHost();
-			if (headerMap != null && !headerMap.isEmpty()) {
-				for (Map.Entry<String, String> entry : headerMap.entrySet()) {
-					get.setHeader(entry.getKey(), entry.getValue());
-				}
-			}
-
-			HttpResponse response = getHttpClient().execute(get);
-			logger.info("response:" + response);
-			HttpEntity resEntity = response.getEntity();
-			int statusCode = response.getStatusLine().getStatusCode();
-			httpResult.setCode(statusCode);
-			if (resEntity != null) {
-				try {
-					result = EntityUtils.toString(resEntity);
-				} catch (Exception e) {
-					logger.error("+++++==> EntityUtils.toString error<==+++++", e);
-				}
-				httpResult.setBody(result);
-			}
-			if (statusCode != OK) {
-				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
-				get.abort();
-				return httpResult;
-			}
-		} catch (SocketTimeoutException e) {
-			httpResult.setCode(READ_TIMEOUT);
-			return httpResult;
-		} catch (IOException e) {
-			logger.error("++++ doGet:" + url + " ++++++", e);
-			httpResult.setCode(OTHER_IO_EXCEPTION);
-			return httpResult;
-		} finally {
-			get.releaseConnection();
-			if (monitorHostList.contains(host)) {
-				logger.warn("============>[" + url + "]" + " use time:[" + (System.currentTimeMillis() - currentTime)
-						+ " ms]<============");
-			}
-		}
-		return httpResult;
-	}
-
-	/**
-	 * ¸ù¾İURL·¢ËÍgetÇëÇó»ñÈ¡Êı¾İ
-	 *
-	 * @param url
-	 * @return
-	 */
-	public static HttpResult doGetWithParams(String url, Map<String, String> paramsMap, int... timeout) {
-		if (paramsMap != null && paramsMap.size() > 0) {
-			url += "?";
-			for (Map.Entry<String, String> m : paramsMap.entrySet()) {
-				url += m.getKey() + "=" + m.getValue() + "&";
-			}
-			System.out.println(url);
-			url = url.substring(0, url.length() - 1);
-			System.out.println(url);
-		}
-		return doGet(url, null, timeout);
-		// HttpResult httpResult = new HttpResult();
-		// long currentTime = System.currentTimeMillis();
-		// String result = null;
-		// HttpGet get = new HttpGet(url);
-		// String host = null;
-		// try {
-		// host = new URL(url).getHost();
-		//
-		// HttpResponse response = getHttpClient(timeout).execute(get);
-		// HttpEntity resEntity = response.getEntity();
-		// int statusCode = response.getStatusLine().getStatusCode();
-		// httpResult.setCode(statusCode);
-		// if (statusCode != OK) {
-		// logger.error("+++++==>statusCode:["+statusCode+"],url:"+url+" <==+++++");
-		// get.abort();
-		// return httpResult;
-		// }
-		// if (resEntity != null) {
-		// String respBody = EntityUtils.toString(resEntity);
-		// try {
-		// result = respBody;
-		// } catch (Exception e) {
-		// logger.error("+++++==> respBody:" + respBody + " <==+++++",e);
-		// }
-		// }
-		// }
-		// catch(SocketTimeoutException e)
-		// {
-		// httpResult.setCode(READ_TIMEOUT);
-		// return httpResult;
-		// } catch (IOException e) {
-		// logger.error("++++ doGet:" + url + " ++++++", e);
-		// httpResult.setCode(OTHER_IO_EXCEPTION);
-		// return httpResult;
-		// } finally {
-		// get.releaseConnection();
-		// if(monitorHostList.contains(host)){
-		// logger.warn("============>["+url+"]"+" use
-		// time:["+(System.currentTimeMillis()-currentTime)+" ms]<============");
-		// }
-		// }
-		// httpResult.setBody(result);
-		// return httpResult;
-	}
-
-	/**
-	 * ¸ù¾İURL·¢ËÍgetÇëÇó»ñÈ¡Êı¾İ
-	 *
-	 * @param url
-	 * @return
-	 */
-	public static HttpResult doGet(String url, int... timeout) {
-		return doGet(url, null, timeout);
-		// HttpResult httpResult = new HttpResult();
-		// long currentTime = System.currentTimeMillis();
-		// String result = null;
-		// HttpGet get = new HttpGet(url);
-		// String host = null;
-		// HttpClient client = null;
-		// HttpResponse response = null;
-		// try {
-		// host = new URL(url).getHost();
-		// client = getHttpClient(timeout);
-		// response = client.execute(get);
-		// HttpEntity resEntity = response.getEntity();
-		// int statusCode = response.getStatusLine().getStatusCode();
-		// httpResult.setCode(statusCode);
-		// if (statusCode != OK) {
-		// logger.error("+++++==>statusCode:["+statusCode+"],url:"+url+" <==+++++");
-		// get.abort();
-		// return httpResult;
-		// }
-		// if (resEntity != null) {
-		// try {
-		// result = EntityUtils.toString(resEntity);
-		// } catch (Exception e) {
-		// logger.error("+++++==> respBody:" + result + " <==+++++",e);
-		// }
-		// resEntity = null;
-		// }
-		// }
-		// catch(SocketTimeoutException e)
-		// {
-		// httpResult.setCode(READ_TIMEOUT);
-		// return httpResult;
-		// }catch (IOException e) {
-		// logger.error("++++ doGet:" + url + " ++++++", e);
-		// httpResult.setCode(OTHER_IO_EXCEPTION);
-		// return httpResult;
-		// } finally {
-		// get.releaseConnection();
-		// response=null;
-		// client=null;
-		// if(monitorHostList.contains(host)){
-		// logger.warn("============>["+url+"]"+" use
-		// time:["+(System.currentTimeMillis()-currentTime)+" ms]<============");
-		// }
-		// }
-		// httpResult.setBody(result);
-		// return httpResult;
-	}
-
-	public static HttpResult doPostCharSet(String url, Map<String, String> paramsMap, String charSet, int... timeout) {
-		return doPostCharSet(url, paramsMap, null, charSet, timeout);
-	}
-
-	/**
-	 * ¸ù¾İURL·¢ËÍpostÇëÇó»ñÈ¡Êı¾İ,Ö§³Ö´«×Ö·û¼¯
-	 * 
-	 * @param url
-	 * @param paramsMap
-	 * @return
-	 */
-	public static HttpResult doPostCharSet(String url, Map<String, String> paramsMap, Map<String, String> headerMap,
-			String charSet, int... timeout) {
-		HttpResult httpResult = new HttpResult();
-		long currentTime = System.currentTimeMillis();
-		String result = null;
-		HttpPost post = new HttpPost(url);
-		String host = null;
-		try {
-			host = new URL(url).getHost();
-
-			// post.addHeader("Cookie", "JSESSIONID=DCD7BFE23126E4B69ABCC415A6D688AF;
-			// Path=/");
-			charSet = charSet == null || charSet.trim().equals("") ? "UTF-8" : charSet;
-			if (paramsMap != null && paramsMap.size() > 0) {
-				List<NameValuePair> params = new ArrayList<NameValuePair>();
-				for (Map.Entry<String, String> m : paramsMap.entrySet()) {
-					params.add(new BasicNameValuePair(m.getKey(), m.getValue()));
-				}
-				UrlEncodedFormEntity reqEntity = new UrlEncodedFormEntity(params, charSet);
-				post.setEntity(reqEntity);
-			}
-
-			// ÉèÖÃHeader
-			if (headerMap != null && !headerMap.isEmpty()) {
-				for (Map.Entry<String, String> entry : headerMap.entrySet()) {
-					post.setHeader(entry.getKey(), entry.getValue());
-				}
-			}
-
-			HttpResponse response = getHttpClient().execute(post);
-
-			HttpEntity resEntity = response.getEntity();
-			int statusCode = response.getStatusLine().getStatusCode();
-			httpResult.setCode(statusCode);
-			if (resEntity != null) {
-				try {
-					result = EntityUtils.toString(resEntity);
-				} catch (Exception e) {
-					logger.error("+++++==> EntityUtils.toString <==+++++", e);
-				}
-				httpResult.setBody(result);
-			}
-			if (statusCode != OK) {
-				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
-				post.abort();
-				return httpResult;
-			}
-		} catch (SocketTimeoutException e) {
-			httpResult.setCode(READ_TIMEOUT);
-			return httpResult;
-		} catch (IOException e) {
-			logger.error("+++++==> doPost:" + url + " <==+++++", e);
-			httpResult.setCode(OTHER_IO_EXCEPTION);
-			return httpResult;
-		} finally {
-			post.releaseConnection();
-			if (monitorHostList.contains(host)) {
-				logger.warn("============>[" + url + "]" + " use time:[" + (System.currentTimeMillis() - currentTime)
-						+ " ms]<============");
-			}
-		}
-		return httpResult;
-	}
-
-	public static HttpResult doPost(String url, Map<String, String> paramsMap, int... timeout) {
-		return doPost(url, paramsMap, null, timeout);
-	}
-
-	/**
-	 * ¸ù¾İURL·¢ËÍpostÇëÇó»ñÈ¡Êı¾İ
-	 *
-	 * @param url
-	 * @param paramsMap
-	 * @return
-	 */
-	public static HttpResult doPost(String url, Map<String, String> paramsMap, Map<String, String> headerMap,
-			int... timeout) {
-		HttpResult httpResult = new HttpResult();
-		long currentTime = System.currentTimeMillis();
-		String result = null;
-		HttpPost post = new HttpPost(url);
-		String host = null;
-		try {
-			host = new URL(url).getHost();
-
-			// post.addHeader("Cookie", "JSESSIONID=DCD7BFE23126E4B69ABCC415A6D688AF;
-			// Path=/");
-
-			if (paramsMap != null && paramsMap.size() > 0) {
-				List<NameValuePair> params = new ArrayList<NameValuePair>();
-				for (Map.Entry<String, String> m : paramsMap.entrySet()) {
-					params.add(new BasicNameValuePair(m.getKey(), m.getValue()));
-				}
-				UrlEncodedFormEntity reqEntity = new UrlEncodedFormEntity(params, "UTF-8");
-				post.setEntity(reqEntity);
-			}
-
-			// ÉèÖÃHeader
-			if (headerMap != null && !headerMap.isEmpty()) {
-				for (Map.Entry<String, String> entry : headerMap.entrySet()) {
-					post.setHeader(entry.getKey(), entry.getValue());
-				}
-			}
-
-			HttpResponse response = getHttpClient().execute(post);
-
-			HttpEntity resEntity = response.getEntity();
-			int statusCode = response.getStatusLine().getStatusCode();
-			httpResult.setCode(statusCode);
-			if (resEntity != null) {
-				try {
-					result = EntityUtils.toString(resEntity);
-				} catch (Exception e) {
-					logger.error("+++++==> EntityUtils.toString <==+++++", e);
-				}
-				httpResult.setBody(result);
-			}
-			if (statusCode != OK) {
-				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
-				post.abort();
-				return httpResult;
-			}
-		} catch (SocketTimeoutException e) {
-			httpResult.setCode(READ_TIMEOUT);
-			return httpResult;
-		} catch (IOException e) {
-			logger.error("+++++==> doPost:" + url + " <==+++++", e);
-			httpResult.setCode(OTHER_IO_EXCEPTION);
-			return httpResult;
-		} finally {
-			post.releaseConnection();
-			if (monitorHostList.contains(host)) {
-				logger.warn("============>[" + url + "]" + " use time:[" + (System.currentTimeMillis() - currentTime)
-						+ " ms]<============");
-			}
-		}
-		return httpResult;
-	}
-
-	/**
-	 * ¸ù¾İURL·¢ËÍpostÇëÇó»ñÈ¡Êı¾İ
-	 * 
-	 * @param url
-	 * @param paramsMap
-	 * @return
-	 */
-	public static HttpResult doPostGetCookie(String url, Map<String, String> paramsMap, int... timeout) {
-		HttpResult httpResult = new HttpResult();
-		long currentTime = System.currentTimeMillis();
-		String result = null;
-		HttpPost post = new HttpPost(url);
-		String host = null;
-		try {
-			host = new URL(url).getHost();
-			if (paramsMap != null && paramsMap.size() > 0) {
-				List<NameValuePair> params = new ArrayList<NameValuePair>();
-				for (Map.Entry<String, String> m : paramsMap.entrySet()) {
-					params.add(new BasicNameValuePair(m.getKey(), m.getValue()));
-				}
-				UrlEncodedFormEntity reqEntity = new UrlEncodedFormEntity(params, "UTF-8");
-				post.setEntity(reqEntity);
-			}
-			HttpResponse response = getHttpClient().execute(post);
-			Header[] cookie = response.getHeaders("Set-Cookie");
-
-			int statusCode = response.getStatusLine().getStatusCode();
-			httpResult.setCode(statusCode);
-			if (statusCode != OK) {
-				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
-				post.abort();
-				return httpResult;
-			}
-			if (cookie != null) {
-				result = cookie[0].toString();
-				result = result.split("Set-Cookie: ")[1];
-			}
-
-		} catch (SocketTimeoutException e) {
-			httpResult.setCode(READ_TIMEOUT);
-			return httpResult;
-		} catch (IOException e) {
-			logger.error("+++++==> doPost:" + url + " <==+++++", e);
-			httpResult.setCode(OTHER_IO_EXCEPTION);
-			return httpResult;
-		} finally {
-			post.releaseConnection();
-			if (monitorHostList.contains(host)) {
-				logger.warn("============>[" + url + "]" + " use time:[" + (System.currentTimeMillis() - currentTime)
-						+ " ms]<============");
-			}
-		}
-		httpResult.setBody(result);
-		return httpResult;
-	}
-
-	public static HttpResult doPostUseCookie(String url, Map<String, String> paramsMap, String cookie, int... timeout) {
-		HttpResult httpResult = new HttpResult();
-		long currentTime = System.currentTimeMillis();
-		String result = null;
-		HttpPost post = new HttpPost(url);
-		String host = null;
-		try {
-			host = new URL(url).getHost();
-			post.addHeader("Cookie", cookie);
-			if (paramsMap != null && paramsMap.size() > 0) {
-				List<NameValuePair> params = new ArrayList<NameValuePair>();
-				for (Map.Entry<String, String> m : paramsMap.entrySet()) {
-					params.add(new BasicNameValuePair(m.getKey(), m.getValue()));
-				}
-				UrlEncodedFormEntity reqEntity = new UrlEncodedFormEntity(params, "UTF-8");
-				post.setEntity(reqEntity);
-			}
-			HttpResponse response = getHttpClient().execute(post);
-
-			HttpEntity resEntity = response.getEntity();
-			int statusCode = response.getStatusLine().getStatusCode();
-			httpResult.setCode(statusCode);
-			if (statusCode != OK) {
-				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
-				post.abort();
-				return httpResult;
-			}
-			if (resEntity != null) {
-				String respBody = EntityUtils.toString(resEntity);
-				try {
-					result = respBody;
-				} catch (Exception e) {
-					logger.error("+++++==> respBody:" + respBody + " <==+++++", e);
-				}
-			}
-		} catch (SocketTimeoutException e) {
-			httpResult.setCode(READ_TIMEOUT);
-			return httpResult;
-		} catch (IOException e) {
-			logger.error("+++++==> doPost:" + url + " <==+++++", e);
-			httpResult.setCode(OTHER_IO_EXCEPTION);
-			return httpResult;
-		} finally {
-			post.releaseConnection();
-			if (monitorHostList.contains(host)) {
-				logger.warn("============>[" + url + "]" + " use time:[" + (System.currentTimeMillis() - currentTime)
-						+ " ms]<============");
-			}
-		}
-		httpResult.setBody(result);
-		return httpResult;
-	}
-
-	/**
-	 * ·ÃÎÊ·şÎñ
-	 * 
-	 * @param url
-	 *            µØÖ·
-	 * @param xml
-	 * @return
-	 * @throws Exception
-	 */
-	public static HttpResult doPostXml(String url, String xml, int... timeout) {
-		return doPostXml(url, "UTF-8", xml, null, timeout);
-	}
-
-	public static HttpResult doPostXml(String url, String xml, Map<String, String> headerMap, int... timeout) {
-		return doPostXml(url, "UTF-8", xml, headerMap, timeout);
-	}
-
-	public static HttpResult doPostXml(String url, String charSet, String xml, int... timeout) {
-		return doPostXml(url, charSet, xml, null, timeout);
-	}
-
-	public static HttpResult doPostXml(String url, String charSet, String xml, Map<String, String> headerMap,
-			int... timeout) {
-		HttpResult httpResult = new HttpResult();
-		long currentTime = System.currentTimeMillis();
-		String result = null, host = null;
-		HttpPost post = new HttpPost(url);
-		// È»ºó°ÑSoapÇëÇóÊı¾İÌí¼Óµ½PostMethodÖĞ
-		byte[] b = null;
-		InputStream is = null;
-		HttpResponse response = null;
-		HttpClient httpClient = null;
-		try {
-			host = new URL(url).getHost();
-			if (headerMap != null && !headerMap.isEmpty()) {
-				for (Map.Entry<String, String> entry : headerMap.entrySet()) {
-					post.setHeader(entry.getKey(), entry.getValue());
-				}
-			}
-			charSet = charSet == null ? "UTF-8" : charSet;
-			b = xml.getBytes(charSet);
-			is = new ByteArrayInputStream(b, 0, b.length);
-			HttpEntity reqEntity = new InputStreamEntity(is, b.length,
-					ContentType.create(ContentType.TEXT_XML.getMimeType(), Charset.forName(charSet)));
-			post.setEntity(reqEntity);
-			httpClient = getHttpClient();
-			response = httpClient.execute(post);
-			HttpEntity resEntity = response.getEntity();
-			int statusCode = response.getStatusLine().getStatusCode();
-			httpResult.setCode(statusCode);
-			if (resEntity != null) {
-				try {
-					result = EntityUtils.toString(resEntity);
-					httpResult.setBody(result);
-				} catch (Exception e) {
-					logger.error("+++++==> EntityUtils.toString error <==+++++", e);
-				}
-			}
-			if (statusCode != OK) {
-				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
-				post.abort();
-				return httpResult;
-			}
-
-		} catch (SocketTimeoutException e) {
-			httpResult.setCode(READ_TIMEOUT);
-			return httpResult;
-		} catch (Exception e) {
-			logger.error("+++++==> doPostXml:" + url + " <==+++++", e);
-			httpResult.setCode(OTHER_IO_EXCEPTION);
-			return httpResult;
-		} finally {
-			post.releaseConnection();
-			response = null;
-			httpClient = null;
-			if (is != null) {
-				try {
-					is.close();
-				} catch (IOException e) {
-					logger.error("HttpClientUtil doPostXml error", e);
-				}
-			}
-			if (monitorHostList.contains(host)) {
-				logger.warn("============>[" + url + "]" + " use time:[" + (System.currentTimeMillis() - currentTime)
-						+ " ms]<============");
-			}
-		}
-
-		return httpResult;
-	}
-
-	/**
-	 * ¸ù¾İURL·¢ËÍpostÇëÇó»ñÈ¡Êı¾İ Rest
-	 * 
-	 * @param url
-	 * @return
-	 */
-	public static HttpResult doPostJson(String url, String json, int... timeout) {
-		HttpResult httpResult = new HttpResult();
-		String result = null;
-		HttpPost post = new HttpPost(url);
-		try {
-			post.addHeader("content-type", "application/json");
-			if (StringUtils.isNotEmpty(json)) {
-				StringEntity myEntity = new StringEntity(json, "UTF-8");
-				post.setEntity(myEntity);
-			}
-			HttpResponse response = getHttpClient().execute(post);
-
-			HttpEntity resEntity = response.getEntity();
-			int statusCode = response.getStatusLine().getStatusCode();
-			httpResult.setCode(statusCode);
-			Map<String, String> headerMap = new HashMap<String, String>();
-			for (Header header : response.getAllHeaders()) {
-				headerMap.put(header.getName(), header.getValue());
-			}
-			httpResult.setHeaderMap(headerMap);
-			if (resEntity != null) {
-				try {
-					result = EntityUtils.toString(resEntity);
-				} catch (Exception e) {
-					logger.error("+++++==> EntityUtils.toString <==+++++", e);
-				}
-				httpResult.setBody(result);
-			}
-
-			if (statusCode != OK) {
-				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
-				post.abort();
-				return httpResult;
-			}
-
-		} catch (SocketTimeoutException e) {
-			httpResult.setCode(READ_TIMEOUT);
-			return httpResult;
-		} catch (IOException e) {
-			logger.error("+++++==> doPostJson:" + url + " <==+++++", e);
-			httpResult.setCode(OTHER_IO_EXCEPTION);
-			return httpResult;
-		} finally {
-			post.releaseConnection();
-		}
-		return httpResult;
-	}
-
-	public static HttpResult doPostJson(String url, String json, String charset, int... timeout) {
-		HttpResult httpResult = new HttpResult();
-		String result = null;
-		HttpPost post = new HttpPost(url);
-		try {
-			post.addHeader("content-type", "application/json");
-			if (StringUtils.isNotEmpty(json)) {
-				StringEntity myEntity = new StringEntity(json, charset);
-				post.setEntity(myEntity);
-			}
-			HttpResponse response = getHttpClient().execute(post);
-
-			HttpEntity resEntity = response.getEntity();
-			int statusCode = response.getStatusLine().getStatusCode();
-			httpResult.setCode(statusCode);
-			Map<String, String> headerMap = new HashMap<String, String>();
-			for (Header header : response.getAllHeaders()) {
-				headerMap.put(header.getName(), header.getValue());
-			}
-			httpResult.setHeaderMap(headerMap);
-			if (resEntity != null) {
-				try {
-					result = EntityUtils.toString(resEntity);
-				} catch (Exception e) {
-					logger.error("+++++==> EntityUtils.toString <==+++++", e);
-				}
-				httpResult.setBody(result);
-			}
-
-			if (statusCode != OK) {
-				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
-				post.abort();
-				return httpResult;
-			}
-
-		} catch (SocketTimeoutException e) {
-			httpResult.setCode(READ_TIMEOUT);
-			return httpResult;
-		} catch (IOException e) {
-			logger.error("+++++==> doPostJson:" + url + " <==+++++", e);
-			httpResult.setCode(OTHER_IO_EXCEPTION);
-			return httpResult;
-		} finally {
-			post.releaseConnection();
-		}
-		return httpResult;
-	}
-
-	/**
-	 * Í¼Æ¬ÎÄ¼ş
-	 */
-	public static final String FILE_TYPE_IMAGE = "1";
-	/**
-	 * ÊÓÆµÎÄ¼ş
-	 */
-	public static final String FILE_TYPE_VEDIO = "2";
-	/**
-	 * ÒôÆµÎÄ¼ş
-	 */
-	public static final String FILE_TYPE_AUDIO = "3";
-	/**
-	 * °²×°ÎÄ¼ş
-	 */
-	public static final String FILE_TYPE_SETUP = "4";
-	/**
-	 * Ñ¹ËõÎÄ¼ş
-	 */
-	public static final String FILE_TYPE_COMPRESS = "5";
-
-	/**
-	 * ·¢ËÍÎÄ¼şµ½ÎÄ¼ş·şÎñÆ÷
-	 * 
-	 * @param filetype
-	 *            ÎÄ¼şÀàĞÍ 1Í¼Æ¬ 2ÒôÆµ 3ÊÓÆµ 4°²×°ÎÄ¼ş 5ÒÔÉÏ×Ô¶¨Òå
-	 * @param data
-	 * @param typelimit
-	 *            ÎÄ¼şÀàĞÍ ÌîĞ´ÔÊĞíµÄÎÄ¼şÀàĞÍºó×º,¶à¸öÔò¶ººÅ¸ô¿ª
-	 * @param sizelimit
-	 *            ÎÄ¼ş´óĞ¡ µ¥Î»byte,Ä¬ÈÏÎŞÏŞÖÆ
-	 * @return
-	 */
-	public static HttpResult uploadToFileStore(String url, byte[] data, String fileName, String filetype,
-			String typelimit, String sizelimit, int... timeout) {
-		HttpResult httpResult = new HttpResult();
-		String result = null;
-		if (data == null || data.length <= 0) {
-			return null;
-		}
-		File tmpFile = null;
-		HttpPost post = new HttpPost(url);
-		try {
-			MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE, null,
-					Charset.forName("UTF-8"));
-			// 1Í¼Æ¬ 2ÒôÆµ 3ÊÓÆµ 4°²×°ÎÄ¼ş 5ÒÔÉÏ×Ô¶¨Òå
-			if (StringUtils.isNotEmpty(filetype))
-				reqEntity.addPart("filetype", new StringBody(filetype));
-			// ÌîĞ´ÔÊĞíµÄÎÄ¼şÀàĞÍºó×º,¶à¸öÔò¶ººÅ¸ô¿ª
-			if (StringUtils.isNotEmpty(typelimit))
-				reqEntity.addPart("typelimit", new StringBody(typelimit));
-			// µ¥Î»byte,Ä¬ÈÏÎŞÏŞÖÆ
-			if (StringUtils.isNotEmpty(sizelimit))
-				reqEntity.addPart("sizelimit", new StringBody(sizelimit));
-			if (StringUtils.isEmpty(fileName)) {
-				fileName = "tmp.jpeg";
-			}
-			tmpFile = getFileFromBytes(data, "/tmp/" + fileName);
-			if (tmpFile != null && tmpFile.length() > 0)
-				reqEntity.addPart("file", new FileBody(tmpFile));
-
-			post.setEntity(reqEntity);
-
-			HttpResponse response = getHttpClient().execute(post);
-			int statusCode = response.getStatusLine().getStatusCode();
-			httpResult.setCode(statusCode);
-			HttpEntity resEntity = response.getEntity();
-			if (resEntity != null) {
-				String respBody = EntityUtils.toString(resEntity);
-				try {
-					result = respBody;
-				} catch (Exception e) {
-					logger.error("+++++==> respBody:" + respBody + " <==+++++", e);
-				}
-			}
-		} catch (SocketTimeoutException e) {
-			httpResult.setCode(READ_TIMEOUT);
-			return httpResult;
-		} catch (IOException e) {
-			logger.error("+++++==> uploadToFileStore:" + url + " <==+++++", e);
-			httpResult.setCode(OTHER_IO_EXCEPTION);
-			return httpResult;
-		} finally {
-			post.releaseConnection();
-			if (tmpFile != null) {
-				tmpFile.delete();
-			}
-		}
-		httpResult.setBody(result);
-		return httpResult;
-	}
-
-	/**
-	 * Á÷×ªÎÄ¼ş
-	 * 
-	 * @param b
-	 * @param outputFile
-	 * @return
-	 */
-	private static File getFileFromBytes(byte[] b, String outputFile) {
-		File ret = null;
-		if (null == b || StringUtils.isEmpty(outputFile))
-			return null;
-
-		BufferedOutputStream stream = null;
-		try {
-			ret = new File(outputFile);
-			FileOutputStream fstream = new FileOutputStream(ret);
-			stream = new BufferedOutputStream(fstream);
-			stream.write(b);
-		} catch (Exception e) {
-			logger.error("~~~", e);
-		} finally {
-			if (stream != null) {
-				try {
-					stream.close();
-				} catch (IOException e) {
-					logger.error("~~~~", e);
-				}
-			}
-		}
-		return ret;
-	}
-
-	public static String generateUrl(Map<String, String> params) {
-		StringBuffer geturl = new StringBuffer("");
-		List<String> keys = new ArrayList<String>(params.keySet());
-		Collections.sort(keys);
-		for (int i = 0; i < keys.size(); i++) {
-			String key = keys.get(i);
-			String value = params.get(key);
-			try {
-				geturl.append(key + "=" + URLEncoder.encode(value, "utf-8") + "&");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-		}
-		return geturl.toString();
-	}
-
 	
-}
-
-class HttpResult {
-	public void setCode(int statusCode) {
-		// TODO Auto-generated method stub
-	}
-
-	public void setBody(String result) {
-		// TODO Auto-generated method stub
-	}
-
-	public void setHeaderMap(Map<String, String> headerMap) {
-		// TODO Auto-generated method stub
-	}
+	
+	
+//	
+//	
+//	/******************************** æ–¹æ³•åŒº ************************************/
+//			
+//	/**
+//	 * è·å–HttpClientï¼Œç”±è¿æ¥æ± ç®¡ç†å™¨æä¾›
+//	 * @param timeOut 
+//	 * 
+//	 * @return
+//	 */
+//	private static HttpClient getHttpClient(int timeOut) {
+//		HttpClientBuilder clientBuilder = HttpClients.custom();
+//		// ä»è¿æ¥æ± è·å–
+//		clientBuilder.setConnectionManager(clientConnectionManager);
+//		// è®¾ç½®è¿æ¥è¶…æ—¶æ—¶é—´
+//		Builder configBuilder = RequestConfig.custom();
+//		configBuilder.setConnectionRequestTimeout(timeOut * 1000);
+//		configBuilder.setConnectTimeout(timeOut * 1000);
+//		configBuilder.setSocketTimeout(timeOut * 1000);
+//		clientBuilder.setDefaultRequestConfig(configBuilder.build());
+//
+//		// è¯·æ±‚é‡è¯•å¤„ç†ï¼Œé‡è¯•3æ¬¡
+//		HttpRequestRetryHandler httpRequestRetryHandler = new HttpRequestRetryHandler() {
+//			public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
+//				HttpClientContext clientContext = HttpClientContext.adapt(context);
+//				HttpRequest request = clientContext.getRequest();
+//				// å¦‚æœè¯·æ±‚æ˜¯å¹‚ç­‰çš„ï¼Œå°±å†æ¬¡å°è¯•
+//				if (!(request instanceof HttpEntityEnclosingRequest)) { return true; }
+//				// å¦‚æœæœåŠ¡å™¨ä¸¢æ‰äº†è¿æ¥ï¼Œé‚£ä¹ˆå°±é‡è¯•
+//				else if (exception instanceof NoHttpResponseException) { return true; }
+//				// å¦‚æœå·²ç»é‡è¯•äº†3æ¬¡ï¼Œå°±æ”¾å¼ƒ
+//				else if (executionCount >= 3) { return false; }
+//				// ä¸è¦é‡è¯•SSLæ¡æ‰‹å¼‚å¸¸
+//				else if (exception instanceof SSLHandshakeException) { return false; }
+//				// è¶…æ—¶
+//				else if (exception instanceof InterruptedIOException) { return false; }
+//				// ç›®æ ‡æœåŠ¡å™¨ä¸å¯è¾¾
+//				else if (exception instanceof UnknownHostException) { return false; }
+//				// è¿æ¥è¢«æ‹’ç»
+//				else if (exception instanceof ConnectTimeoutException) { return false; }
+//				// sslæ¡æ‰‹å¼‚å¸¸
+//				else if (exception instanceof SSLException) { return false; }
+//				// ä¸å±äºä»¥ä¸Šæƒ…å†µï¼Œä¸é‡è¯•ï¼Œå…¶å®è¿™ä¸ª return å†™åœ¨é‚£ä¸¤ä¸ªtrueåé¢å°±å¥½äº†ï¼Œç•™ä¸‹äº›å¼‚å¸¸å°±å½“å­¦ä¹ 
+//				else { return false; }
+//			}
+//		};
+//		clientBuilder.setRetryHandler(httpRequestRetryHandler);
+//		return clientBuilder.build();
+//	}
+//
+//	
+//	
+//	/********************************************* GET *********************************************/
+//	/**
+//	 * æ ¹æ®ç»™å®šçš„ url åšGETè¯·æ±‚ï¼Œä¸å¸¦å‚æ•°ï¼Œè¶…æ—¶æ—¶é—´é»˜è®¤10s
+//	 * 
+//	 * @param url
+//	 *            å†…éƒ¨æ—¥å¿—ä¼šæ‰“å°è¯¥url
+//	 * @return
+//	 */
+//	public static HttpResult doGet(String url) {
+//		return doGet(url, 10, null, null);
+//	}
+//	
+//	/**
+//	 * å¸¦å‚æ•°çš„GETè¯·æ±‚ï¼Œè¶…æ—¶æ—¶é—´é»˜è®¤10s
+//	 * 
+//	 * @param url
+//	 *            å†…éƒ¨æ—¥å¿—ä¼šæ‰“å°è¯¥url
+//	 * @param paramMap
+//	 * @return
+//	 */
+//	public static HttpResult doGet(String url, Map<String, String> paramMap) {
+//		return doGet(url, 10, paramMap, null);
+//	}
+//	
+//	/**
+//	 * å¸¦å‚æ•°çš„GETè¯·æ±‚ï¼Œéœ€æ‰‹åŠ¨æŒ‡å®šè¶…æ—¶æ—¶é—´
+//	 * 
+//	 * @param url
+//	 *            å†…éƒ¨æ—¥å¿—ä¼šæ‰“å°è¯¥url
+//	 * @param timeOut
+//	 * @param paramMap
+//	 * @return
+//	 */
+//	public static HttpResult doGet(String url, int timeOut, Map<String, String> paramMap) {
+//		return doGet(url, timeOut, paramMap, null);
+//	}
+//	
+//	/**
+//	 * åŸºç¡€çš„æ‰§è¡Œæ–¹æ³•ï¼Œget è¯·æ±‚æœ€åéƒ½èµ°è¿™ä¸ªï¼Œå¦‚æœå‘ç”Ÿå¼‚å¸¸åˆ™è¿”å›null
+//	 * 
+//	 * @param url
+//	 *            å†…éƒ¨æ—¥å¿—ä¼šæ‰“å°è¯¥url
+//	 * @param timeOut
+//	 * @param paramMap
+//	 * @param headerMap
+//	 * @return
+//	 */
+//	public static HttpResult doGet(String url, int timeOut, Map<String, String> paramMap, Map<String, String> headerMap) {
+//		HttpResult result = new HttpResult();
+//		// ç”Ÿæˆæ–°çš„URL
+//		url = generateUrl(url, paramMap);
+//		logger.error("GETè¯·æ±‚çš„Urlä¸ºï¼š{}", url);
+//		// è®¾ç½®Httpè¯·æ±‚å¤´
+//		HttpGet httpGet = setHeader(headerMap, new HttpGet(url));
+//		// è·å–è¿æ¥
+//		HttpClient httpClient = getHttpClient(timeOut);
+//		try {
+//			HttpResponse response = httpClient.execute(httpGet);
+//			
+//			
+//			
+//			// è¿™é‡Œå…¶å®å¯ä»¥çœ‹æƒ…å†µåšäº›ä¸œè¥¿
+//		} catch (ClientProtocolException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		} finally {
+//			httpGet.releaseConnection();
+//		}
+//		return result;
+//	}
+//
+//
+//	/**
+//	 * GETè¯·æ±‚ï¼Œå°†å‚æ•°æ”¾å…¥URLä¸­
+//	 * @param paramMap
+//	 * @return
+//	 */
+//	private static String generateUrl(String url, Map<String, String> paramMap) {
+//		if(null == paramMap || paramMap.isEmpty()) { return url; }
+//		
+//		StringBuilder newUrl = new StringBuilder(url);
+//		try {
+//			for (Entry<String, String> param : paramMap.entrySet()) {
+//				// key
+//				newUrl.append("&").append(param.getKey());
+//				// value
+//				newUrl.append("=").append(URLEncoder.encode(param.getValue(), "UTF-8"));
+//			}
+//			// è¿™ä¸ªcatchä¹Ÿå°±æ„æ€æ„æ€â€¦â€¦
+//		} catch (UnsupportedEncodingException e) {
+//			logger.error("ç”Ÿæˆ GET è¯·æ±‚ URL æ—¶å‘ç”Ÿå¼‚å¸¸", e);
+//		}
+//		return newUrl.toString().replaceFirst("&", "?");
+//	}
+//	
+//	/**
+//	 * è®¾ç½®header
+//	 * @param headerMap
+//	 * @param httpGet
+//	 * @return
+//	 */
+//	private static HttpGet setHeader(Map<String, String> headerMap, HttpGet httpGet) {
+//		if(CollectionUtils.isEmpty(headerMap)) { return httpGet; }
+//		
+//		for(Entry<String, String> header : headerMap.entrySet()) {
+//			httpGet.setHeader(header.getKey(), header.getValue());
+//		}
+//		return httpGet;
+//	}
+//
+//	
+//	public static HttpResult doGet(String url, Map<String, String> headerMap, int timeOut) {
+//		HttpResult httpResult = new HttpResult();
+//		long currentTime = System.currentTimeMillis();
+//		String result = null;
+//		HttpGet get = new HttpGet(url);
+//		String host = null;
+//		try {
+//			host = new URL(url).getHost();
+//			if (headerMap != null && !headerMap.isEmpty()) {
+//				for (Map.Entry<String, String> entry : headerMap.entrySet()) {
+//					get.setHeader(entry.getKey(), entry.getValue());
+//				}
+//			}
+//
+//			HttpResponse response = getHttpClient().execute(get);
+//			logger.info("response:" + response);
+//			HttpEntity resEntity = response.getEntity();
+//			int statusCode = response.getStatusLine().getStatusCode();
+//			httpResult.setCode(statusCode);
+//			if (resEntity != null) {
+//				try {
+//					result = EntityUtils.toString(resEntity);
+//				} catch (Exception e) {
+//					logger.error("+++++==> EntityUtils.toString error<==+++++", e);
+//				}
+//				httpResult.setBody(result);
+//			}
+//			if (statusCode != OK) {
+//				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
+//				get.abort();
+//				return httpResult;
+//			}
+//		} catch (SocketTimeoutException e) {
+//			httpResult.setCode(READ_TIMEOUT);
+//			return httpResult;
+//		} catch (IOException e) {
+//			logger.error("++++ doGet:" + url + " ++++++", e);
+//			httpResult.setCode(OTHER_IO_EXCEPTION);
+//			return httpResult;
+//		} finally {
+//			get.releaseConnection();
+//		}
+//		return httpResult;
+//	}
+//
+//	
+//	/******************************************* POST *********************************************/
+//	public static HttpResult doPostContent(String url, String content, String contentType) {
+//		HttpResult httpResult = new HttpResult();
+//		String result = null;
+//		HttpPost post = new HttpPost(url);
+//		try {
+//
+//			if (StringUtils.isNotEmpty(content)) {
+//				post.setEntity(new StringEntity(content, "UTF-8"));
+//			}
+//
+//			// è®¾ç½®Header
+//			if (StringUtils.isNotEmpty(contentType)) {
+//				post.setHeader("Content-Type", contentType);
+//			}
+//			HttpResponse response = getHttpClient().execute(post);
+//
+//			HttpEntity resEntity = response.getEntity();
+//			int statusCode = response.getStatusLine().getStatusCode();
+//			httpResult.setCode(statusCode);
+//
+//			Map<String, String> headerMap = new HashMap<String, String>();
+//			for (Header header : response.getAllHeaders()) {
+//				headerMap.put(header.getName(), header.getValue());
+//			}
+//			httpResult.setHeaderMap(headerMap);
+//
+//			if (statusCode != OK) {
+//				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
+//				post.abort();
+//				return httpResult;
+//			}
+//			if (resEntity != null) {
+//				String respBody = EntityUtils.toString(resEntity);
+//				try {
+//					result = respBody;
+//				} catch (Exception e) {
+//					logger.error("+++++==> respBody:" + respBody + " <==+++++", e);
+//				}
+//			}
+//		} catch (SocketTimeoutException e) {
+//			httpResult.setCode(READ_TIMEOUT);
+//			return httpResult;
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			logger.error("+++++==> doPost:" + url + " <==+++++", e);
+//			httpResult.setCode(OTHER_IO_EXCEPTION);
+//			return httpResult;
+//		} finally {
+//			post.releaseConnection();
+//		}
+//		httpResult.setBody(result);
+//		return httpResult;
+//	}
+//
+//	
+//
+//
+//	public static HttpResult doPostCharSet(String url, Map<String, String> paramsMap, String charSet, int... timeout) {
+//		return doPostCharSet(url, paramsMap, null, charSet, timeout);
+//	}
+//
+//	/**
+//	 * æ ¹æ®URLå‘é€postè¯·æ±‚è·å–æ•°æ®,æ”¯æŒä¼ å­—ç¬¦é›†
+//	 * 
+//	 * @param url
+//	 * @param paramsMap
+//	 * @return
+//	 */
+//	public static HttpResult doPostCharSet(String url, Map<String, String> paramsMap, Map<String, String> headerMap,
+//			String charSet, int... timeout) {
+//		HttpResult httpResult = new HttpResult();
+//		long currentTime = System.currentTimeMillis();
+//		String result = null;
+//		HttpPost post = new HttpPost(url);
+//		String host = null;
+//		try {
+//			host = new URL(url).getHost();
+//
+//			// post.addHeader("Cookie", "JSESSIONID=DCD7BFE23126E4B69ABCC415A6D688AF;
+//			// Path=/");
+//			charSet = charSet == null || charSet.trim().equals("") ? "UTF-8" : charSet;
+//			if (paramsMap != null && paramsMap.size() > 0) {
+//				List<NameValuePair> params = new ArrayList<NameValuePair>();
+//				for (Map.Entry<String, String> m : paramsMap.entrySet()) {
+//					params.add(new BasicNameValuePair(m.getKey(), m.getValue()));
+//				}
+//				UrlEncodedFormEntity reqEntity = new UrlEncodedFormEntity(params, charSet);
+//				post.setEntity(reqEntity);
+//			}
+//
+//			// è®¾ç½®Header
+//			if (headerMap != null && !headerMap.isEmpty()) {
+//				for (Map.Entry<String, String> entry : headerMap.entrySet()) {
+//					post.setHeader(entry.getKey(), entry.getValue());
+//				}
+//			}
+//
+//			HttpResponse response = getHttpClient().execute(post);
+//
+//			HttpEntity resEntity = response.getEntity();
+//			int statusCode = response.getStatusLine().getStatusCode();
+//			httpResult.setCode(statusCode);
+//			if (resEntity != null) {
+//				try {
+//					result = EntityUtils.toString(resEntity);
+//				} catch (Exception e) {
+//					logger.error("+++++==> EntityUtils.toString <==+++++", e);
+//				}
+//				httpResult.setBody(result);
+//			}
+//			if (statusCode != OK) {
+//				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
+//				post.abort();
+//				return httpResult;
+//			}
+//		} catch (SocketTimeoutException e) {
+//			httpResult.setCode(READ_TIMEOUT);
+//			return httpResult;
+//		} catch (IOException e) {
+//			logger.error("+++++==> doPost:" + url + " <==+++++", e);
+//			httpResult.setCode(OTHER_IO_EXCEPTION);
+//			return httpResult;
+//		} finally {
+//			post.releaseConnection();
+//			if (monitorHostList.contains(host)) {
+//				logger.warn("============>[" + url + "]" + " use time:[" + (System.currentTimeMillis() - currentTime)
+//						+ " ms]<============");
+//			}
+//		}
+//		return httpResult;
+//	}
+//
+//	public static HttpResult doPost(String url, Map<String, String> paramsMap, int... timeout) {
+//		return doPost(url, paramsMap, null, timeout);
+//	}
+//
+//	/**
+//	 * æ ¹æ®URLå‘é€postè¯·æ±‚è·å–æ•°æ®
+//	 *
+//	 * @param url
+//	 * @param paramsMap
+//	 * @return
+//	 */
+//	public static HttpResult doPost(String url, Map<String, String> paramsMap, Map<String, String> headerMap,
+//			int... timeout) {
+//		HttpResult httpResult = new HttpResult();
+//		long currentTime = System.currentTimeMillis();
+//		String result = null;
+//		HttpPost post = new HttpPost(url);
+//		String host = null;
+//		try {
+//			host = new URL(url).getHost();
+//
+//			// post.addHeader("Cookie", "JSESSIONID=DCD7BFE23126E4B69ABCC415A6D688AF;
+//			// Path=/");
+//
+//			if (paramsMap != null && paramsMap.size() > 0) {
+//				List<NameValuePair> params = new ArrayList<NameValuePair>();
+//				for (Map.Entry<String, String> m : paramsMap.entrySet()) {
+//					params.add(new BasicNameValuePair(m.getKey(), m.getValue()));
+//				}
+//				UrlEncodedFormEntity reqEntity = new UrlEncodedFormEntity(params, "UTF-8");
+//				post.setEntity(reqEntity);
+//			}
+//
+//			// è®¾ç½®Header
+//			if (headerMap != null && !headerMap.isEmpty()) {
+//				for (Map.Entry<String, String> entry : headerMap.entrySet()) {
+//					post.setHeader(entry.getKey(), entry.getValue());
+//				}
+//			}
+//
+//			HttpResponse response = getHttpClient().execute(post);
+//
+//			HttpEntity resEntity = response.getEntity();
+//			int statusCode = response.getStatusLine().getStatusCode();
+//			httpResult.setCode(statusCode);
+//			if (resEntity != null) {
+//				try {
+//					result = EntityUtils.toString(resEntity);
+//				} catch (Exception e) {
+//					logger.error("+++++==> EntityUtils.toString <==+++++", e);
+//				}
+//				httpResult.setBody(result);
+//			}
+//			if (statusCode != OK) {
+//				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
+//				post.abort();
+//				return httpResult;
+//			}
+//		} catch (SocketTimeoutException e) {
+//			httpResult.setCode(READ_TIMEOUT);
+//			return httpResult;
+//		} catch (IOException e) {
+//			logger.error("+++++==> doPost:" + url + " <==+++++", e);
+//			httpResult.setCode(OTHER_IO_EXCEPTION);
+//			return httpResult;
+//		} finally {
+//			post.releaseConnection();
+//			if (monitorHostList.contains(host)) {
+//				logger.warn("============>[" + url + "]" + " use time:[" + (System.currentTimeMillis() - currentTime)
+//						+ " ms]<============");
+//			}
+//		}
+//		return httpResult;
+//	}
+//
+//	/**
+//	 * æ ¹æ®URLå‘é€postè¯·æ±‚è·å–æ•°æ®
+//	 * 
+//	 * @param url
+//	 * @param paramsMap
+//	 * @return
+//	 */
+//	public static HttpResult doPostGetCookie(String url, Map<String, String> paramsMap, int... timeout) {
+//		HttpResult httpResult = new HttpResult();
+//		long currentTime = System.currentTimeMillis();
+//		String result = null;
+//		HttpPost post = new HttpPost(url);
+//		String host = null;
+//		try {
+//			host = new URL(url).getHost();
+//			if (paramsMap != null && paramsMap.size() > 0) {
+//				List<NameValuePair> params = new ArrayList<NameValuePair>();
+//				for (Map.Entry<String, String> m : paramsMap.entrySet()) {
+//					params.add(new BasicNameValuePair(m.getKey(), m.getValue()));
+//				}
+//				UrlEncodedFormEntity reqEntity = new UrlEncodedFormEntity(params, "UTF-8");
+//				post.setEntity(reqEntity);
+//			}
+//			HttpResponse response = getHttpClient().execute(post);
+//			Header[] cookie = response.getHeaders("Set-Cookie");
+//
+//			int statusCode = response.getStatusLine().getStatusCode();
+//			httpResult.setCode(statusCode);
+//			if (statusCode != OK) {
+//				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
+//				post.abort();
+//				return httpResult;
+//			}
+//			if (cookie != null) {
+//				result = cookie[0].toString();
+//				result = result.split("Set-Cookie: ")[1];
+//			}
+//
+//		} catch (SocketTimeoutException e) {
+//			httpResult.setCode(READ_TIMEOUT);
+//			return httpResult;
+//		} catch (IOException e) {
+//			logger.error("+++++==> doPost:" + url + " <==+++++", e);
+//			httpResult.setCode(OTHER_IO_EXCEPTION);
+//			return httpResult;
+//		} finally {
+//			post.releaseConnection();
+//			if (monitorHostList.contains(host)) {
+//				logger.warn("============>[" + url + "]" + " use time:[" + (System.currentTimeMillis() - currentTime)
+//						+ " ms]<============");
+//			}
+//		}
+//		httpResult.setBody(result);
+//		return httpResult;
+//	}
+//
+//	public static HttpResult doPostUseCookie(String url, Map<String, String> paramsMap, String cookie, int... timeout) {
+//		HttpResult httpResult = new HttpResult();
+//		long currentTime = System.currentTimeMillis();
+//		String result = null;
+//		HttpPost post = new HttpPost(url);
+//		String host = null;
+//		try {
+//			host = new URL(url).getHost();
+//			post.addHeader("Cookie", cookie);
+//			if (paramsMap != null && paramsMap.size() > 0) {
+//				List<NameValuePair> params = new ArrayList<NameValuePair>();
+//				for (Map.Entry<String, String> m : paramsMap.entrySet()) {
+//					params.add(new BasicNameValuePair(m.getKey(), m.getValue()));
+//				}
+//				UrlEncodedFormEntity reqEntity = new UrlEncodedFormEntity(params, "UTF-8");
+//				post.setEntity(reqEntity);
+//			}
+//			HttpResponse response = getHttpClient().execute(post);
+//
+//			HttpEntity resEntity = response.getEntity();
+//			int statusCode = response.getStatusLine().getStatusCode();
+//			httpResult.setCode(statusCode);
+//			if (statusCode != OK) {
+//				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
+//				post.abort();
+//				return httpResult;
+//			}
+//			if (resEntity != null) {
+//				String respBody = EntityUtils.toString(resEntity);
+//				try {
+//					result = respBody;
+//				} catch (Exception e) {
+//					logger.error("+++++==> respBody:" + respBody + " <==+++++", e);
+//				}
+//			}
+//		} catch (SocketTimeoutException e) {
+//			httpResult.setCode(READ_TIMEOUT);
+//			return httpResult;
+//		} catch (IOException e) {
+//			logger.error("+++++==> doPost:" + url + " <==+++++", e);
+//			httpResult.setCode(OTHER_IO_EXCEPTION);
+//			return httpResult;
+//		} finally {
+//			post.releaseConnection();
+//			if (monitorHostList.contains(host)) {
+//				logger.warn("============>[" + url + "]" + " use time:[" + (System.currentTimeMillis() - currentTime)
+//						+ " ms]<============");
+//			}
+//		}
+//		httpResult.setBody(result);
+//		return httpResult;
+//	}
+//
+//	/**
+//	 * è®¿é—®æœåŠ¡
+//	 * 
+//	 * @param url
+//	 *            åœ°å€
+//	 * @param xml
+//	 * @return
+//	 * @throws Exception
+//	 */
+//	public static HttpResult doPostXml(String url, String xml, int... timeout) {
+//		return doPostXml(url, "UTF-8", xml, null, timeout);
+//	}
+//
+//	public static HttpResult doPostXml(String url, String xml, Map<String, String> headerMap, int... timeout) {
+//		return doPostXml(url, "UTF-8", xml, headerMap, timeout);
+//	}
+//
+//	public static HttpResult doPostXml(String url, String charSet, String xml, int... timeout) {
+//		return doPostXml(url, charSet, xml, null, timeout);
+//	}
+//
+//	public static HttpResult doPostXml(String url, String charSet, String xml, Map<String, String> headerMap,
+//			int... timeout) {
+//		HttpResult httpResult = new HttpResult();
+//		long currentTime = System.currentTimeMillis();
+//		String result = null, host = null;
+//		HttpPost post = new HttpPost(url);
+//		// ç„¶åæŠŠSoapè¯·æ±‚æ•°æ®æ·»åŠ åˆ°PostMethodä¸­
+//		byte[] b = null;
+//		InputStream is = null;
+//		HttpResponse response = null;
+//		HttpClient httpClient = null;
+//		try {
+//			host = new URL(url).getHost();
+//			if (headerMap != null && !headerMap.isEmpty()) {
+//				for (Map.Entry<String, String> entry : headerMap.entrySet()) {
+//					post.setHeader(entry.getKey(), entry.getValue());
+//				}
+//			}
+//			charSet = charSet == null ? "UTF-8" : charSet;
+//			b = xml.getBytes(charSet);
+//			is = new ByteArrayInputStream(b, 0, b.length);
+//			HttpEntity reqEntity = new InputStreamEntity(is, b.length,
+//					ContentType.create(ContentType.TEXT_XML.getMimeType(), Charset.forName(charSet)));
+//			post.setEntity(reqEntity);
+//			httpClient = getHttpClient();
+//			response = httpClient.execute(post);
+//			HttpEntity resEntity = response.getEntity();
+//			int statusCode = response.getStatusLine().getStatusCode();
+//			httpResult.setCode(statusCode);
+//			if (resEntity != null) {
+//				try {
+//					result = EntityUtils.toString(resEntity);
+//					httpResult.setBody(result);
+//				} catch (Exception e) {
+//					logger.error("+++++==> EntityUtils.toString error <==+++++", e);
+//				}
+//			}
+//			if (statusCode != OK) {
+//				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
+//				post.abort();
+//				return httpResult;
+//			}
+//
+//		} catch (SocketTimeoutException e) {
+//			httpResult.setCode(READ_TIMEOUT);
+//			return httpResult;
+//		} catch (Exception e) {
+//			logger.error("+++++==> doPostXml:" + url + " <==+++++", e);
+//			httpResult.setCode(OTHER_IO_EXCEPTION);
+//			return httpResult;
+//		} finally {
+//			post.releaseConnection();
+//			response = null;
+//			httpClient = null;
+//			if (is != null) {
+//				try {
+//					is.close();
+//				} catch (IOException e) {
+//					logger.error("HttpClientUtil doPostXml error", e);
+//				}
+//			}
+//			if (monitorHostList.contains(host)) {
+//				logger.warn("============>[" + url + "]" + " use time:[" + (System.currentTimeMillis() - currentTime)
+//						+ " ms]<============");
+//			}
+//		}
+//
+//		return httpResult;
+//	}
+//
+//	/**
+//	 * æ ¹æ®URLå‘é€postè¯·æ±‚è·å–æ•°æ® Rest
+//	 * 
+//	 * @param url
+//	 * @return
+//	 */
+//	public static HttpResult doPostJson(String url, String json, int... timeout) {
+//		HttpResult httpResult = new HttpResult();
+//		String result = null;
+//		HttpPost post = new HttpPost(url);
+//		try {
+//			post.addHeader("content-type", "application/json");
+//			if (StringUtils.isNotEmpty(json)) {
+//				StringEntity myEntity = new StringEntity(json, "UTF-8");
+//				post.setEntity(myEntity);
+//			}
+//			HttpResponse response = getHttpClient().execute(post);
+//
+//			HttpEntity resEntity = response.getEntity();
+//			int statusCode = response.getStatusLine().getStatusCode();
+//			httpResult.setCode(statusCode);
+//			Map<String, String> headerMap = new HashMap<String, String>();
+//			for (Header header : response.getAllHeaders()) {
+//				headerMap.put(header.getName(), header.getValue());
+//			}
+//			httpResult.setHeaderMap(headerMap);
+//			if (resEntity != null) {
+//				try {
+//					result = EntityUtils.toString(resEntity);
+//				} catch (Exception e) {
+//					logger.error("+++++==> EntityUtils.toString <==+++++", e);
+//				}
+//				httpResult.setBody(result);
+//			}
+//
+//			if (statusCode != OK) {
+//				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
+//				post.abort();
+//				return httpResult;
+//			}
+//
+//		} catch (SocketTimeoutException e) {
+//			httpResult.setCode(READ_TIMEOUT);
+//			return httpResult;
+//		} catch (IOException e) {
+//			logger.error("+++++==> doPostJson:" + url + " <==+++++", e);
+//			httpResult.setCode(OTHER_IO_EXCEPTION);
+//			return httpResult;
+//		} finally {
+//			post.releaseConnection();
+//		}
+//		return httpResult;
+//	}
+//
+//	public static HttpResult doPostJson(String url, String json, String charset, int... timeout) {
+//		HttpResult httpResult = new HttpResult();
+//		String result = null;
+//		HttpPost post = new HttpPost(url);
+//		try {
+//			post.addHeader("content-type", "application/json");
+//			if (StringUtils.isNotEmpty(json)) {
+//				StringEntity myEntity = new StringEntity(json, charset);
+//				post.setEntity(myEntity);
+//			}
+//			HttpResponse response = getHttpClient().execute(post);
+//
+//			HttpEntity resEntity = response.getEntity();
+//			int statusCode = response.getStatusLine().getStatusCode();
+//			httpResult.setCode(statusCode);
+//			Map<String, String> headerMap = new HashMap<String, String>();
+//			for (Header header : response.getAllHeaders()) {
+//				headerMap.put(header.getName(), header.getValue());
+//			}
+//			httpResult.setHeaderMap(headerMap);
+//			if (resEntity != null) {
+//				try {
+//					result = EntityUtils.toString(resEntity);
+//				} catch (Exception e) {
+//					logger.error("+++++==> EntityUtils.toString <==+++++", e);
+//				}
+//				httpResult.setBody(result);
+//			}
+//
+//			if (statusCode != OK) {
+//				logger.error("+++++==>statusCode:[" + statusCode + "],url:" + url + " <==+++++");
+//				post.abort();
+//				return httpResult;
+//			}
+//
+//		} catch (SocketTimeoutException e) {
+//			httpResult.setCode(READ_TIMEOUT);
+//			return httpResult;
+//		} catch (IOException e) {
+//			logger.error("+++++==> doPostJson:" + url + " <==+++++", e);
+//			httpResult.setCode(OTHER_IO_EXCEPTION);
+//			return httpResult;
+//		} finally {
+//			post.releaseConnection();
+//		}
+//		return httpResult;
+//	}
+//
+//	
+//
+//	/**
+//	 * å‘é€æ–‡ä»¶åˆ°æ–‡ä»¶æœåŠ¡å™¨
+//	 * 
+//	 * @param filetype
+//	 *            æ–‡ä»¶ç±»å‹ 1å›¾ç‰‡ 2éŸ³é¢‘ 3è§†é¢‘ 4å®‰è£…æ–‡ä»¶ 5ä»¥ä¸Šè‡ªå®šä¹‰
+//	 * @param data
+//	 * @param typelimit
+//	 *            æ–‡ä»¶ç±»å‹ å¡«å†™å…è®¸çš„æ–‡ä»¶ç±»å‹åç¼€,å¤šä¸ªåˆ™é€—å·éš”å¼€
+//	 * @param sizelimit
+//	 *            æ–‡ä»¶å¤§å° å•ä½byte,é»˜è®¤æ— é™åˆ¶
+//	 * @return
+//	 */
+//	public static HttpResult uploadToFileStore(String url, byte[] data, String fileName, String filetype,
+//			String typelimit, String sizelimit, int... timeout) {
+//		HttpResult httpResult = new HttpResult();
+//		String result = null;
+//		if (data == null || data.length <= 0) {
+//			return null;
+//		}
+//		File tmpFile = null;
+//		HttpPost post = new HttpPost(url);
+//		try {
+//			MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE, null,
+//					Charset.forName("UTF-8"));
+//			// 1å›¾ç‰‡ 2éŸ³é¢‘ 3è§†é¢‘ 4å®‰è£…æ–‡ä»¶ 5ä»¥ä¸Šè‡ªå®šä¹‰
+//			if (StringUtils.isNotEmpty(filetype))
+//				reqEntity.addPart("filetype", new StringBody(filetype));
+//			// å¡«å†™å…è®¸çš„æ–‡ä»¶ç±»å‹åç¼€,å¤šä¸ªåˆ™é€—å·éš”å¼€
+//			if (StringUtils.isNotEmpty(typelimit))
+//				reqEntity.addPart("typelimit", new StringBody(typelimit));
+//			// å•ä½byte,é»˜è®¤æ— é™åˆ¶
+//			if (StringUtils.isNotEmpty(sizelimit))
+//				reqEntity.addPart("sizelimit", new StringBody(sizelimit));
+//			if (StringUtils.isEmpty(fileName)) {
+//				fileName = "tmp.jpeg";
+//			}
+//			tmpFile = getFileFromBytes(data, "/tmp/" + fileName);
+//			if (tmpFile != null && tmpFile.length() > 0)
+//				reqEntity.addPart("file", new FileBody(tmpFile));
+//
+//			post.setEntity(reqEntity);
+//
+//			HttpResponse response = getHttpClient().execute(post);
+//			int statusCode = response.getStatusLine().getStatusCode();
+//			httpResult.setCode(statusCode);
+//			HttpEntity resEntity = response.getEntity();
+//			if (resEntity != null) {
+//				String respBody = EntityUtils.toString(resEntity);
+//				try {
+//					result = respBody;
+//				} catch (Exception e) {
+//					logger.error("+++++==> respBody:" + respBody + " <==+++++", e);
+//				}
+//			}
+//		} catch (SocketTimeoutException e) {
+//			httpResult.setCode(READ_TIMEOUT);
+//			return httpResult;
+//		} catch (IOException e) {
+//			logger.error("+++++==> uploadToFileStore:" + url + " <==+++++", e);
+//			httpResult.setCode(OTHER_IO_EXCEPTION);
+//			return httpResult;
+//		} finally {
+//			post.releaseConnection();
+//			if (tmpFile != null) {
+//				tmpFile.delete();
+//			}
+//		}
+//		httpResult.setBody(result);
+//		return httpResult;
+//	}
+//
+//	/**
+//	 * æµè½¬æ–‡ä»¶
+//	 * 
+//	 * @param b
+//	 * @param outputFile
+//	 * @return
+//	 */
+//	private static File getFileFromBytes(byte[] b, String outputFile) {
+//		File ret = null;
+//		if (null == b || StringUtils.isEmpty(outputFile))
+//			return null;
+//
+//		BufferedOutputStream stream = null;
+//		try {
+//			ret = new File(outputFile);
+//			FileOutputStream fstream = new FileOutputStream(ret);
+//			stream = new BufferedOutputStream(fstream);
+//			stream.write(b);
+//		} catch (Exception e) {
+//			logger.error("~~~", e);
+//		} finally {
+//			if (stream != null) {
+//				try {
+//					stream.close();
+//				} catch (IOException e) {
+//					logger.error("~~~~", e);
+//				}
+//			}
+//		}
+//		return ret;
+//	}
+	
 }
