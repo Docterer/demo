@@ -38,7 +38,7 @@
 
 
 
-		<!-- ########## Web项目主题框架 ########## -->
+		<!-- ########## Web项目主体框架 ########## -->
 		<!-- Servlet & JSP Start-->
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -203,6 +203,13 @@
 			<artifactId>httpclient</artifactId>
 			<version>4.5.3</version>
 		</dependency>
+		<!-- base64 -->
+		<dependency>
+		    <groupId>commons-codec</groupId>
+		    <artifactId>commons-codec</artifactId>
+		    <version>1.11</version>
+		</dependency>
+		
 
 		<!-- json相关 -->
 		<dependency>
@@ -215,6 +222,15 @@
 			<artifactId>fastjson</artifactId>
 			<version>1.2.38</version>
 		</dependency>
+		
+		
+		<!-- xml 相关 -->
+		<dependency>
+		    <groupId>dom4j</groupId>
+		    <artifactId>dom4j</artifactId>
+		    <version>1.6.1</version>
+		</dependency>
+		
 		
 		<!-- 页面相关 -->
 		<dependency>
@@ -239,6 +255,12 @@
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-core_2.11</artifactId>
 			<version>${spark.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- 权限控制 -->
 		<dependency>
@@ -252,6 +274,14 @@
 			<artifactId>lucene-core</artifactId>
 			<version>7.0.0</version>
 		</dependency>
+		
+		<!-- socket传输 -->
+		<dependency>
+		    <groupId>org.apache.mina</groupId>
+		    <artifactId>mina-core</artifactId>
+		    <version>3.0.0-M2</version>
+		</dependency>
+		
 	</dependencies>
 
 
