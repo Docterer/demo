@@ -5,18 +5,34 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.util.CollectionUtils;
+
+import com.google.common.collect.Lists;
 
 public class RegexUtil {
 	
+//	private static Logger logger = LoggerFactory.getLogger(RegexUtil.class);
+	
 	/**
-	 * 递归目录，删除文件名中符合正则表达式的部分
+	 * 文件重命名，去除符合正则表达式的内容
 	 * 
 	 * @author jojo
 	 * @param fileDirectory
@@ -25,7 +41,7 @@ public class RegexUtil {
 	 *            正则表达式数组
 	 */
 	public static void fileRename(File fileDirectory, String[] regexArray) {
-		if(regexArray == null || fileDirectory == null) {
+		if(ArrayUtils.isEmpty(regexArray) || fileDirectory == null) {
 			System.err.println("参数不得为空");
 			return ;
 		}
@@ -45,125 +61,238 @@ public class RegexUtil {
 		}
 	}
 	
-	/***************************** 从HTML获取磁力链 *********************************/
+	
+	
+	
+	
+	
 	/**
-	 * 从网页批量保存图片
+	 * 根据正则表达式，递归删除符合条件的文件
 	 * 
-	 * @param regex
-	 *            提取图片的正则表达式
-	 * @param htmlUrlArray
-	 *            网页的源路径
-	 * @param savePoint
-	 *            提取图片后的保存目录，必须存在
-	 * @param threadNumber
-	 *            工作线程数，默认7条
+	 * @param filePath
+	 * @param regexArr
 	 */
-	public static void getPicFromHTML(String regex, String[] htmlUrlArray, String savePoint, int threadNumber) {
-		try {
-			// 所有图片的url
-			List<String> picUrlList = new ArrayList<String>();
-			for (String htmlUrl : htmlUrlArray) {
-				picUrlList.addAll(getLinkByRegex(regex, htmlUrl));
+	public static void fileDelete(String filePath, String[] regexArr) {
+		if(StringUtils.isBlank(filePath) || StringUtils.isAnyBlank(regexArr)) {
+			System.err.println("参数不得为空");
+			return ;
+		}
+		
+		File file = new File(filePath);
+		if(file.isDirectory()) {
+			for(File tempFile : file.listFiles()) {
+				fileDelete(tempFile.getAbsolutePath(), regexArr);
 			}
-
-			// 分配工作量（有待优化）
-			if (threadNumber == 0 || threadNumber == 1) {
-				threadNumber = 7;
+		}
+		
+		for(String str : regexArr) {
+			if(file.getAbsolutePath().matches(str)) {
+				file.delete();
+				break;
 			}
-			// 平均工作量
-			int workload = picUrlList.size() / threadNumber;
-			// 扫尾工作量
-			int workload2 = picUrlList.size() % threadNumber;
-
-			// 开始工作，先扫尾
-			Worker worker = new Worker(picUrlList.size() - workload2, picUrlList.size(), picUrlList, savePoint);
-			Thread thread = new Thread(worker);
-			thread.start();
-
-			int temp = 1;
-			for (int i = 0; i < threadNumber - 1; i++) {
-				worker = new Worker(temp, workload - 1, picUrlList, savePoint);
-				thread = new Thread(worker);
-				thread.start();
-				temp += workload;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
-
+	
+	
+	
+	
+	
+	
 	/**
-	 * 根据正则表达式获取文件中的链接，获取内容取决于提供的正则表达式
+	 * 解压文件至目标文件夹
 	 * 
-	 * @param regex
-	 * @param htmlUrl
+	 * @param filePath
+	 * @param destinationPath
+	 */
+	public static void fileDecompress(String filePath, String destinationPath) throws Exception {
+		File file = new File(filePath);
+		if (!file.exists()) {
+			System.err.println("要解压的文件不存在");
+			return;
+		} else if (StringUtils.isBlank(destinationPath) || !new File(destinationPath).isDirectory()) {
+			System.err.println("保存位置无效");
+			return;
+		}
+
+		BufferedInputStream bufferedIn = null;
+		BufferedOutputStream bufferedOut = null;
+		ZipFile zipFile = null;
+		try {
+			zipFile = new ZipFile(file);
+			Enumeration<? extends ZipEntry> enumeration = zipFile.entries();
+			while (enumeration.hasMoreElements()) {
+				ZipEntry zipEntry = enumeration.nextElement();
+				
+				// 生成特定文件名
+				String fileName = createFileName(destinationPath, zipFile, zipEntry);
+				
+				// 根据生成的文件名，创建文件或目录
+				File targetFile = createDirectoryOrFileByName(fileName);
+				if(targetFile.isDirectory()) continue;
+
+				// 读取内容
+				bufferedIn = new BufferedInputStream(zipFile.getInputStream(zipEntry));
+				bufferedOut = new BufferedOutputStream(new FileOutputStream(targetFile));
+
+				byte[] container = new byte[10 * 1024];
+				int lengthOfReadByte = 0;
+				while ((lengthOfReadByte = bufferedIn.read(container)) != -1) {
+					bufferedOut.write(container, 0, lengthOfReadByte);
+				}
+				bufferedOut.flush();
+			}
+		} finally {
+			if (bufferedIn != null) bufferedIn.close();
+			if (bufferedOut != null) bufferedOut.close();
+			if (zipFile != null) zipFile.close();
+		}
+	}
+	/**
+	 * 生成特定文件名
+	 * @param destinationPath
+	 * @param zipFile
+	 * @param zipEntry
+	 * @return
+	 */
+	private static String createFileName(String destinationPath, ZipFile zipFile, ZipEntry zipEntry) {
+		StringBuffer result = new StringBuffer();
+		result.append(destinationPath + File.separator);
+		// 提取压缩文件名，并作为文件夹
+		String zipFileName = zipFile.getName();
+		int temp = zipFileName.lastIndexOf(File.separator);
+		// 如果存在文件分隔符
+		if (temp != -1) {
+			result.append(zipFileName.substring(temp + 1).split("\\.")[0]);
+		} else {
+			result.append(zipFileName);
+		}
+		result.append(File.separator);
+		result.append(zipEntry.getName());
+
+		return result.toString();
+	}
+	/**
+	 * 根据生成的文件名，创建文件或目录
+	 * @param fileName
+	 * @return 
+	 * @throws IOException 
+	 */
+	private static File createDirectoryOrFileByName(String fileName) throws IOException {
+		if(StringUtils.isBlank(fileName)) {
+			return null ;
+		}
+		File file = new File(fileName);
+		File parent = file.getParentFile();
+		if(parent != null && !parent.exists()) {
+			parent.mkdirs();
+		}
+		// 如果是目录，则不需要读取内容
+		if (!fileName.matches(".+\\.\\w+$")) {
+			if (!file.exists()) file.mkdirs();
+		} else {
+			file.createNewFile();
+		}
+		return file;
+	}
+	
+	
+	/**
+	 * 把文件读成字符串
+	 * @param filePath
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<String> getLinkByRegex(String regex, String htmlUrl) throws Exception {
-		List<String> list = new ArrayList<String>();
+	public static String getStringFromFile(String filePath) throws Exception {
+		if (StringUtils.isBlank(filePath)) {
+			System.err.println("必填项不能为空");
+		}
 		BufferedReader bufferedIn = null;
+		StringBuilder fileString = new StringBuilder();
 		try {
-			// 将网页内容读进内存
+			bufferedIn = new BufferedReader(new FileReader(filePath));
+			String temp = null;
+			while ((temp = bufferedIn.readLine()) != null) {
+				fileString.append(temp);
+			}
+		} finally {
+			if (bufferedIn != null) bufferedIn.close();
+		}
+		return fileString.toString();
+	}
+	
+	
+	/**
+	 * 获取HTML字符串
+	 * @param url
+	 * @return
+	 * @throws Exception 
+	 */
+	public static String getStringFromUrl(String url) throws Exception {
+		if(StringUtils.isBlank(url)) {
+			System.err.println("必填项不能为空");
+		}
+		BufferedReader bufferedIn = null;
+		String result = null;
+		try {
 			StringBuilder htmlString = new StringBuilder();
-			URL url = new URL(htmlUrl);
-			URLConnection connection = url.openConnection();
+			URL httpUrl = new URL(url);
+			URLConnection connection = httpUrl.openConnection();
 			bufferedIn = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String temp = null;
 			while ((temp = bufferedIn.readLine()) != null) {
 				htmlString.append(temp);
 			}
-
-			// 开始匹配
-			Pattern p = Pattern.compile(regex);
-			Matcher m = p.matcher(htmlString);
+			result = htmlString.toString();
+		} finally {
+			if(bufferedIn != null) bufferedIn.close();
+		}
+		return result;
+	}
+	
+	/**
+	 * 根据正则表达式过滤字符串
+	 * @param rawData
+	 * @param regex
+	 * @return
+	 */
+	public static List<String> filterByRegex(String rawData, String... regex) {
+		if (ArrayUtils.isEmpty(regex) || StringUtils.isBlank(rawData)) {
+			System.err.println("必填项不能为空");
+		}
+		List<String> resultList = Lists.newArrayList();
+		// 开始匹配
+		for (String reg : regex) {
+			Pattern p = Pattern.compile(reg);
+			Matcher m = p.matcher(rawData);
 			while (m.find()) {
 				String str = m.group();
-				list.add(str);
-				/*
-				 * 加这个我很莫名奇妙，但不加最后找出来的URL必然重复一次，不知道为什么
-				 */
-				m.find();
+				System.out.println("根据正则表达式" + reg + "找到目标" + str);
+				resultList.add(str);
+				// 不懂为甚么有时候要在find一次
+//				m.find();
 			}
-		} finally {
-			if (bufferedIn != null) { bufferedIn.close(); }
 		}
-		return list;
+		System.out.println("总计：" + resultList.size() + "个");
+		return resultList;
 	}
-}
-
-/**
- * 工作线程
- */
-class Worker implements Runnable {
-
-	private int startNumber;
-	private int endNumber;
-	private List<String> picUrlList;
-	private String savePoint;
-
-	public Worker(int startNumber, int endNumber, List<String> picUrlList, String savePoint) {
-		super();
-		this.startNumber = startNumber;
-		this.endNumber = endNumber;
-		this.picUrlList = picUrlList;
-		this.savePoint = savePoint;
-	}
-
-	@Override
-	public void run() {
-		try {
-			for (; startNumber < endNumber + 1; startNumber++) {
-				System.out.println("开始处理第" + startNumber + "张");
-				String realSavePoint = savePoint + File.separator + startNumber + ".jpg";
-				// list的索引从0开始
-				this.savePicToLocal(picUrlList.get(startNumber - 1), realSavePoint);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+	
+	/**
+	 * 批量
+	 * @param picUrlList
+	 * @param savePoint
+	 * @throws Exception
+	 */
+	public static void batchSavePicToLocal(List<String> picUrlList, String savePoint, int startPosition) throws Exception {
+		if(CollectionUtils.isEmpty(picUrlList)) {
+			return ;
+		}
+		int count = startPosition;
+		for (String picUrl : picUrlList) {
+			System.out.println("正在保存" + (++count) + "个文件");
+			savePicToLocal(picUrl, savePoint + File.separator + count + ".jpg");
 		}
 	}
-
+	
 	/**
 	 * 根据给定的url从服务器获取图片，并保存在指定位置。注意，指定目录必须存在。<br>
 	 * 
@@ -171,30 +300,85 @@ class Worker implements Runnable {
 	 * @param savePoint
 	 * @throws Exception
 	 */
-	public void savePicToLocal(String picUrl, String savePoint) throws Exception {
+	public static void savePicToLocal(String picUrl, String savePoint) throws Exception {
 		BufferedOutputStream bufferedOut = null;
 		BufferedInputStream bufferedIn = null;
 		// 这个 try 块只是为了关闭资源
 		try {
-			URL url = new URL(picUrl);
-			URLConnection connection = url.openConnection();
-			connection.connect();
-
 			// IO
 			File file = new File(savePoint);
+			File parent = file.getParentFile();
+			if (parent != null && !parent.exists()) {
+				parent.mkdirs();
+			}
 			if (!file.exists()) {
 				file.createNewFile();
 			}
+			
+			URL url = new URL(picUrl);
+			URLConnection connection = url.openConnection();
+			connection.connect();
+			
 			bufferedIn = new BufferedInputStream(connection.getInputStream());
 			bufferedOut = new BufferedOutputStream(new FileOutputStream(file));
-			// 必须用int，不然图片会失真
-			int temp = 0;
-			while ((temp = bufferedIn.read()) != -1) {
-				bufferedOut.write(temp);
+
+			byte[] container = new byte[100 * 1024];
+			int lengthOfReadByte = 0;
+			while ((lengthOfReadByte = bufferedIn.read(container)) != -1) {
+				bufferedOut.write(container, 0, lengthOfReadByte);
 			}
+			bufferedOut.flush();
 		} finally {
-			if (bufferedIn != null) { bufferedIn.close(); }
-			if (bufferedOut != null) { bufferedOut.close(); }
+			if (bufferedIn != null) {
+				bufferedIn.close();
+			}
+			if (bufferedOut != null) {
+				bufferedOut.close();
+			}
 		}
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * 
+	 * @param clazz
+	 */
+	public static void showGettersOrSetters(Class<?> clazz) {
+		Field[] fields = clazz.getDeclaredFields();
+
+		List<Field> list = Arrays.asList(fields);
+		Collections.sort(list, new Comparator<Field>() {
+			@Override
+			public int compare(Field o1, Field o2) {
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
+
+		for (Field field : fields) {
+			StringBuffer sb = new StringBuffer();
+			sb.append("temp.set");
+			sb.append(field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1));
+			sb.append("(").append(" ").append(");");
+			System.out.println(sb.toString());
+		}
+	}
+
 }
