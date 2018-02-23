@@ -337,6 +337,24 @@ public class RegexUtil {
 			}
 		}
 	}
+	/**
+	 * 
+	 * @param filePath
+	 *            "D:\\Workspace\\test\\1.txt"
+	 * @param startPos
+	 *            42
+	 * @param savePoint
+	 *            图片保存位置
+	 * @param regex
+	 *            "http://[\\.\\w/]+jpg"
+	 * @throws Exception
+	 */
+	public static void savePicToLocalByUrlWhichGetFromFile(String filePath, int startPos, String savePoint,
+			String... regex) throws Exception {
+		String fileString = RegexUtil.getStringFromFile(filePath);
+		List<String> urlList = RegexUtil.filterByRegex(fileString, regex);
+		RegexUtil.batchSavePicToLocal(urlList, savePoint, startPos);
+	}
 	
 	
 	
