@@ -29,42 +29,10 @@
 	<!-- 有组织且组织大则按组织分，没有或组织太小按类型分，啥都不知道的在丢一起 -->
 	<!-- 依赖的jar包 -->
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
+	
 
-
-
-		<!-- ########## Web项目主体框架 ########## -->
-		<!-- Servlet & JSP Start-->
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet.jsp</groupId>
-			<artifactId>jsp-api</artifactId>
-			<version>2.2.1-b03</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>jstl</artifactId>
-			<version>1.2</version>
-		</dependency>
-		<!-- Servlet & JSP End-->
-		
-		
-		
-
-		<!-- Spring Framework Start -->
-		<!-- mvc框架依赖 spring-context，也依赖spring-web，所以不写了，我是能省就省 -->
-		<dependency>
+		<!-- ************************Spring Framework start******************** -->
+		<dependency><!-- mvc框架依赖 spring-context，也依赖spring-web，所以不写了，我是能省就省 -->
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>${spring.version}</version>
@@ -74,14 +42,12 @@
 			<artifactId>spring-tx</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
-		<!-- 少了会报java.lang.NoClassDefFoundError -->
-		<dependency>
+		<dependency><!-- 少了会报java.lang.NoClassDefFoundError -->
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
-		<!-- 用于支持spring-aop -->
-		<dependency>
+		<dependency><!-- 用于支持spring-aop -->
 			<groupId>aopalliance</groupId>
 			<artifactId>aopalliance</artifactId>
 			<version>1.0</version>
@@ -91,20 +57,13 @@
 			<artifactId>aspectjweaver</artifactId>
 			<version>1.8.10</version>
 		</dependency>
-		<!-- Spring Framework End -->
+		<!-- ************************Spring Framework End******************** -->
 
 
 
 
 
-<!--############## 持久层框架及插件 ###############-->
-		<!-- MySQL Connector Start -->
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.44</version>
-		</dependency>
-		<!-- MySQL Connector End -->
+		
 		
 		
 		<!-- *****************************阿里巴巴************************ -->
@@ -122,42 +81,6 @@
 		
 		
 		
-		<dependency>
-			<groupId>org.mybatis</groupId>
-			<artifactId>mybatis</artifactId>
-			<version>3.4.1</version>
-		</dependency>
-		<dependency><!-- 中间件 -->
-			<groupId>org.mybatis</groupId>
-			<artifactId>mybatis-spring</artifactId>
-			<version>1.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mybatis.generator</groupId>
-			<artifactId>mybatis-generator-core</artifactId>
-			<version>1.3.5</version>
-		</dependency>
-		<!-- 通用mapper及分页插件 -->
-		<dependency>
-			<groupId>tk.mybatis</groupId>
-			<artifactId>mapper</artifactId>
-			<version>3.4.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.pagehelper</groupId>
-			<artifactId>pagehelper</artifactId>
-			<version>4.2.1</version>
-		</dependency>
-		
-
-
-		<!-- hibernate-start -->
-		<dependency>
-		    <groupId>org.hibernate</groupId>
-		    <artifactId>hibernate-core</artifactId>
-		    <version>5.2.12.Final</version>
-		</dependency>
-		<!-- hibernate-end -->
 
 
 
@@ -254,6 +177,60 @@
 		<!-- *********************google********************** -->
 		
 		
+		
+		
+		
+		
+		<!-- MySQL Connector Start -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.44</version>
+		</dependency>
+		<!-- MySQL Connector End -->
+		
+		<!-- mybatis start -->
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+			<version>3.4.1</version>
+		</dependency>
+		<dependency><!-- 中间件 -->
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis-spring</artifactId>
+			<version>1.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mybatis.generator</groupId>
+			<artifactId>mybatis-generator-core</artifactId>
+			<version>1.3.5</version>
+		</dependency>
+		<!-- 通用mapper及分页插件 -->
+		<dependency>
+			<groupId>tk.mybatis</groupId>
+			<artifactId>mapper</artifactId>
+			<version>3.4.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.pagehelper</groupId>
+			<artifactId>pagehelper</artifactId>
+			<version>4.2.1</version>
+		</dependency>
+		<!-- mybatis end -->
+		
+
+
+		<!-- hibernate-start -->
+		<dependency>
+		    <groupId>org.hibernate</groupId>
+		    <artifactId>hibernate-core</artifactId>
+		    <version>5.2.12.Final</version>
+		</dependency>
+		<!-- hibernate-end -->
+		
+		
+		
+		
 		<!-- 模板技术 -->
 		<dependency>
 		    <groupId>org.freemarker</groupId>
@@ -310,6 +287,36 @@
 		</dependency>
 		
 		
+		
+		
+		<!-- Servlet & JSP Start-->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<version>2.2.1-b03</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<!-- Servlet & JSP End-->
+		
+		
+		
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 

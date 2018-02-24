@@ -1,13 +1,40 @@
 ###sqlserver
-// ²éÑ¯±íµÄ×Ö¶ÎÀàĞÍ
+// æŸ¥è¯¢è¡¨çš„å­—æ®µç±»å‹
 SELECT * FROM INFORMATION_SCHEMA.columns WHERE TABLE_NAME='lpdsuser';
 
+// æŸ¥è¯¢è¢«é”ä½çš„è¡¨
+SELECT
+	request_session_id spid,
+	OBJECT_NAME (
+		resource_associated_entity_id
+	) tableName
+FROM
+	sys.dm_tran_locks
+WHERE
+	resource_type = 'OBJECT'
+	
 
+	
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 ###mysql
-// ÏÔÊ¾ËùÓĞÊı¾İ¿â
+// æ˜¾ç¤ºæ‰€æœ‰æ•°æ®åº“
 show databases;
 
-// ´´½¨ÓëÉ¾³ıÊı¾İ¿â
-create database Êı¾İ¿âÃû; 		£¨¶Ô£¬Ã»´í£¬²»ÒªÒıºÅ£©
-drop database Êı¾İ¿âÃû;			£¨¶Ô£¬Ã»´í£¬²»ÒªÒıºÅ£©
+// åˆ›å»ºä¸åˆ é™¤æ•°æ®åº“
+create database æ•°æ®åº“å; 		ï¼ˆå¯¹ï¼Œæ²¡é”™ï¼Œä¸è¦å¼•å·ï¼‰
+drop database æ•°æ®åº“å;			ï¼ˆå¯¹ï¼Œæ²¡é”™ï¼Œä¸è¦å¼•å·ï¼‰
