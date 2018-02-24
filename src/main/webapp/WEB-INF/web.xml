@@ -13,7 +13,7 @@
 		<welcome-file>default.jsp</welcome-file>
 	</welcome-file-list>
 
-	<!-- 为了注解 -->
+	<!-- 使用此监听器后才能自动加载配置文件 -->
 	<listener>
 		<description>Spring容器加载监听器</description>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
