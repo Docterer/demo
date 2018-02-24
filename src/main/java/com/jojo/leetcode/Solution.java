@@ -1,5 +1,7 @@
 package com.jojo.leetcode;
 
+import java.util.HashMap;
+
 public class Solution {
 
 	public int pathSum(TreeNode root, int sum) {
@@ -9,7 +11,7 @@ public class Solution {
 		int count = depth(root, sum);
 		int rightCount = pathSum(root.right, sum);
 		int leftCount = pathSum(root.left, sum);
-		
+
 		return count + leftCount + rightCount;
 	}
 
@@ -24,34 +26,55 @@ public class Solution {
 		return left + right;
 	}
 
-	
 	/**
-	 * leetcode 189
-	 * @param nums
-	 * @param k
+	 * 771. Jewels and Stones
+	 * 
+	 * @param J
+	 * @param S
+	 * @return
 	 */
-	public void rotate(int[] nums, int k) {
-       
-    }
+	public int numJewelsInStones(String J, String S) {
+		if (J == null || "".equals(J) || S == null || "".equals(S)) {
+			return 0;
+		}
+		HashMap<Character, Integer> map = new HashMap<Character, Integer>();
+		for (Character c : J.toCharArray()) {
+			map.put(c, 1);
+		}
+		int result = 0;
+		for (Character c : S.toCharArray()) {
+			if (map.get(c) != null) {
+				++result;
+			}
+		}
+		return result;
+	}
+
+
+	
+	
+	
+	
+	
 	
 	
 	
 	public static void main(String[] args) {
-		Solution solution = new Solution();
-		
-		TreeNode root = new TreeNode(10);
+//		Solution solution = new Solution();
+//
+//		TreeNode root = new TreeNode(10);
+//
+//		root.left = new TreeNode(5);
+//		root.right = new TreeNode(-3);
+//
+//		root.left.left = new TreeNode(3);
+//		root.left.right = new TreeNode(2);
+//		root.right.right = new TreeNode(11);
+//
+//		root.left.left.left = new TreeNode(3);
+//		root.left.left.right = new TreeNode(-2);
+//		root.left.right.right = new TreeNode(1);
+//		System.out.println(solution.pathSum(root, 8));
 
-		root.left = new TreeNode(5);
-		root.right = new TreeNode(-3);
-
-		root.left.left = new TreeNode(3);
-		root.left.right = new TreeNode(2);
-		root.right.right = new TreeNode(11);
-
-		root.left.left.left = new TreeNode(3);
-		root.left.left.right = new TreeNode(-2);
-		root.left.right.right = new TreeNode(1);
-		System.out.println(solution.pathSum(root, 8));
-		
 	}
 }

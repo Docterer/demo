@@ -25,6 +25,8 @@
 		<plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin" />
 		<!-- 自动实现序列化接口 -->
 		<plugin type="org.mybatis.generator.plugins.SerializablePlugin" />
+		<!-- 自动生成静态常量 -->
+		<plugin type="com.jojo.util.generator.plugin.AddStaticPropPlugin" />
 
 
 		<!-- 抑制注释 -->

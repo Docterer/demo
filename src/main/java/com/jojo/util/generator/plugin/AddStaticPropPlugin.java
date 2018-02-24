@@ -1,4 +1,4 @@
-package com.jojo.ssm.mybatis.plugin;
+package com.jojo.util.generator.plugin;
 
 import java.util.List;
 

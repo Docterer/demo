@@ -1,4 +1,4 @@
-package com.jojo.util;
+package com.jojo.util.generator;
 
 import java.io.BufferedWriter;
 import java.io.File;

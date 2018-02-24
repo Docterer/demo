@@ -1,4 +1,4 @@
-package com.jojo.util;
+package com.jojo.util.generator;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import org.mybatis.generator.config.xml.ConfigurationParser;
 import org.mybatis.generator.internal.DefaultShellCallback;
 import org.springframework.util.ResourceUtils;
 
-public class DemoMBG {
+public class MybatisGenerator {
 	public static void main(String[] args) throws Exception {
 		List<String> warnings = new ArrayList<String>();
 		boolean overwrite = false;
