@@ -14,24 +14,24 @@ import tk.mybatis.mapper.entity.Example;
 public class BaseServiceImpl<T> implements BaseService<T> {
 
 	/**
-	 * Í¨ÓÃmapper
+	 * é€šç”¨mapper
 	 */
 	@Autowired
 	private Mapper<T> mapper;
 
 	/**
-	 * ·ºĞÍµÄClass
+	 * æ³›å‹çš„Class
 	 */
 	private Class<T> classOfT;
 
 	/**
-	 * ¹¹Ôìº¯Êı£¬»ñÈ¡·ºĞÍµÄClassÀàĞÍ
+	 * æ„é€ å‡½æ•°ï¼Œè·å–æ³›å‹çš„Classç±»å‹
 	 */
 	@SuppressWarnings("unchecked")
 	public BaseServiceImpl() {
 		Type genType = getClass().getGenericSuperclass();
 		// java.lang.ClassCastException: java.lang.Class cannot be cast to java.lang.reflect.ParameterizedType
-		// ÎÒËûÂèËÀ»îÏë²»Í¨£¬ÎÒnewÕâ¸ö¶ÔÏó£¬±ØÈ»±¨ÉÏÃæÄÇ¸ö´í¡£¿ÉÎªÊ²Ã´×¢Èë¾ÍĞĞ£¿
+		// æˆ‘ä»–å¦ˆæ­»æ´»æƒ³ä¸é€šï¼Œæˆ‘newè¿™ä¸ªå¯¹è±¡ï¼Œå¿…ç„¶æŠ¥ä¸Šé¢é‚£ä¸ªé”™ã€‚å¯ä¸ºä»€ä¹ˆæ³¨å…¥å°±è¡Œï¼Ÿ
 		Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
 		classOfT = (Class<T>) params[0];
 	}
@@ -77,7 +77,7 @@ public class BaseServiceImpl<T> implements BaseService<T> {
 	}
 
 	/**
-	 * Õâ¶«Î÷°É£¬²å¼şÃ»ÓĞ×Ô¼ºÊµÏÖ£¬²éÒ»¸öµÄ¹¦ÄÜÊÇ¿¿·ÖÒ³Ä£Äâ³öÀ´µÄ£¬·µ»ØµÚÒ»Ò³µÄµÚÒ»¸ö
+	 * è¿™ä¸œè¥¿å§ï¼Œæ’ä»¶æ²¡æœ‰è‡ªå·±å®ç°ï¼ŒæŸ¥ä¸€ä¸ªçš„åŠŸèƒ½æ˜¯é åˆ†é¡µæ¨¡æ‹Ÿå‡ºæ¥çš„ï¼Œè¿”å›ç¬¬ä¸€é¡µçš„ç¬¬ä¸€ä¸ª
 	 */
 	@Override
 	public T selectOneByExample(Object example) {

@@ -10,7 +10,7 @@ import java.io.ObjectOutputStream;
  *
  * Static utilities for serialization and deserialization.
  */
-public abstract class SerializationUtil {
+public class SerializationUtil {
 
 	/**
 	 * Serialize the given object to a byte array.

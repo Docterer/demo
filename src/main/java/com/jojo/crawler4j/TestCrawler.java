@@ -9,7 +9,7 @@ import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 /**
- * 以下例子copy自GitHub
+ * 浠ヤ笅渚嬪瓙copy鑷狦itHub
  * 
  * @author jojo
  *

@@ -11,7 +11,7 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 public class Crawler4jController {
 
 	/**
-	 * ×îÆÕÍ¨µÄÅÀ³æ
+	 * æœ€æ™®é€šçš„çˆ¬è™«
 	 * 
 	 * @throws Exception
 	 */

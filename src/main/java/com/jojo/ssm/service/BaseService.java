@@ -7,17 +7,17 @@ import tk.mybatis.mapper.entity.Example;
 public interface BaseService<T> {
 
 	/**
-	 * ´´½¨Ä£°å
+	 * åˆ›å»ºæ¨¡æ¿
 	 * 
 	 * @return
 	 */
 	Example buildExample();
 
 	/**
-	 * Ôö
+	 * å¢
 	 */
 	/**
-	 * nullÖµÒ²»á²å½øÈ¥
+	 * nullå€¼ä¹Ÿä¼šæ’è¿›å»
 	 * 
 	 * @param entity
 	 * @return
@@ -25,7 +25,7 @@ public interface BaseService<T> {
 	int insert(T entity);
 
 	/**
-	 * nullÖµ²»²å£¬½«Ê¹ÓÃÊı¾İ¿âµÄÄ¬ÈÏÖµ
+	 * nullå€¼ä¸æ’ï¼Œå°†ä½¿ç”¨æ•°æ®åº“çš„é»˜è®¤å€¼
 	 * 
 	 * @param entity
 	 * @return
@@ -33,14 +33,14 @@ public interface BaseService<T> {
 	int insertSelective(T entity);
 
 	/**
-	 * É¾
+	 * åˆ 
 	 */
 	int deleteByPrimaryKey(Object key);
 
 	int deleteByExample(Object example);
 
 	/**
-	 * ²é
+	 * æŸ¥
 	 */
 	int selectCountByExample(Object example);
 
@@ -55,7 +55,7 @@ public interface BaseService<T> {
 	List<T> selectAll();
 
 	/**
-	 * ¸Ä
+	 * æ”¹
 	 */
 	int updateByPrimaryKey(T entity);
 
