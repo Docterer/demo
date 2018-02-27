@@ -1,5 +1,9 @@
 package com.jojo.zzz;
 
+import java.util.List;
+
+import com.clearspring.analytics.util.Lists;
+
 /**
  * 开干
  * 
@@ -7,18 +11,11 @@ package com.jojo.zzz;
  *
  */
 public class Work {
-
 	public static void main(String[] args) {
-		new A();
-		System.gc();
+		List<Integer> list = Lists.newArrayList();
+		for(Integer i : list) {
+			
+		}
 	}
 }
 
-class A {
-
-	@Override
-	protected void finalize() throws Throwable {
-		System.out.println("被回收了");
-	}
-
-}

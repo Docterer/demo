@@ -52,8 +52,31 @@ public class Solution {
 
 
 	
-	
-	
+	/**
+	 * 665. Non-decreasing Array 
+	 * 
+	 * 对于 i 与 i+1，如果 i+1 大于 i 之前的值，那么就另 i = i+1，
+	 * 如果 i+1 小于 i 之前的某个数字，那么令 i+1 = i
+	 * 
+	 * @param nums
+	 * @return
+	 */
+	public static boolean checkPossibility(int[] nums) {
+		if (nums == null || nums.length == 0) {
+			return false;
+		}
+		int count = 0;
+		for (int i = 1; i < nums.length; i++) {
+			if (nums[i - 1] > nums[i]) {
+				count++;
+			}
+		}
+		if (count >= 2) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 	
 	
 	
@@ -76,5 +99,6 @@ public class Solution {
 //		root.left.right.right = new TreeNode(1);
 //		System.out.println(solution.pathSum(root, 8));
 
+		System.out.println(checkPossibility(new int[] {3,4,2,3}));
 	}
 }
