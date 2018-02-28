@@ -16,6 +16,7 @@
 		<spring.version>4.3.10.RELEASE</spring.version>
 		<poi.version>3.15</poi.version>
 		<spark.version>2.2.0</spark.version>
+		<slf4j.version>1.7.25</slf4j.version>
 		<!-- 编译等级 -->
 		<source.jdk.version>1.8</source.jdk.version>
 		<target.jdk.version>1.8</target.jdk.version>
@@ -247,13 +248,43 @@
 		</dependency>
 		
 		
-
-		<!-- 日志，logback依赖于slf4j接口，因此就不写它的dependency了 -->
+		<!-- ***********************************打日志***************************************** -->
+		<!-- 要如何做到slf4j，兼容所有输出日志工具 -->
+		<dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
+		    <version>${slf4j.version}</version>
+		</dependency>
+		<!--commons-logging替换成slf4j-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <!--log4j替换成slf4j-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <!-- java.util.logging替换成slf4j -->
+		<dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>jul-to-slf4j</artifactId>
+		    <version>${slf4j.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.2.3</version>
 		</dependency>
+		<!--logback spring扩展-->
+        <dependency>
+            <groupId>org.logback-extensions</groupId>
+            <artifactId>logback-ext-spring</artifactId>
+            <version>0.1.4</version>
+        </dependency>
+		<!-- ***********************************打日志***************************************** -->
 		
 		
 		

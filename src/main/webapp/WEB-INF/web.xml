@@ -13,16 +13,25 @@
 		<welcome-file>default.jsp</welcome-file>
 	</welcome-file-list>
 
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath*:config/applicationContext-*.xml</param-value>
+	</context-param>
+
+
+	<!-- 防止发生java.beans.Introspector内存泄露,应将它配置在ContextLoaderListener的前面 -->
+	<!-- 详细描述见http://blog.csdn.net/jadyer/article/details/11991457 -->
+	<listener>
+		<listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
+	</listener>
+
 	<!-- 使用此监听器后才能自动加载配置文件 -->
 	<listener>
 		<description>Spring容器加载监听器</description>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 
-	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath*:config/applicationContext-*.xml</param-value>
-	</context-param>
 
 	<!-- 中文环境下乱码问题 -->
 	<filter>

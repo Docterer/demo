@@ -7,11 +7,12 @@
 	<!-- 输出目的地是控制台 -->
 	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder charset="UTF-8">
-			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %class{16}:%line - %msg%n</pattern>
 		</encoder>
 	</appender>
 
-	<root level="INFO">
+
+	<root level="ERROR">
 		<appender-ref ref="stdout" />
 	</root>
 </configuration>
