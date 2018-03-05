@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
@@ -21,15 +22,18 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.util.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
 public class RegexUtil {
 	
-//	private static Logger logger = LoggerFactory.getLogger(RegexUtil.class);
+	private static Logger logger = LoggerFactory.getLogger(RegexUtil.class);
 	
 	/**
 	 * 文件重命名，去除符合正则表达式的内容
@@ -220,6 +224,51 @@ public class RegexUtil {
 		return fileString.toString();
 	}
 	
+	/**
+	 * 取url最后一部分，但不包括参数，通常用来获取文件名
+	 * 
+	 * @param url
+	 * @return
+	 */
+	public static String getLastPartOfUrl(String url) {
+		if (StringUtils.isBlank(url)) {
+			logger.error("URL为空");
+			return null;
+		}
+		int questionMark = url.indexOf("?");
+		if (questionMark != -1) {
+			url = url.substring(0, url.indexOf("?"));
+		}
+		String[] arr = url.split("/");
+		if (ArrayUtils.isEmpty(arr)) {
+			logger.error("该URL不合法或非restful风格");
+			return null;
+		}
+		return arr[arr.length - 1];
+	}
+
+	/**
+	 * 取url中文件后缀名
+	 * 
+	 * @param url
+	 * @return
+	 */
+	public static String getSuffixFromUrl(String url) {
+		if (StringUtils.isBlank(url)) {
+			logger.error("URL为空");
+			return null;
+		}
+		int questionMark = url.indexOf("?");
+		if (questionMark != -1) {
+			url = url.substring(0, url.indexOf("?"));
+		}
+		String[] arr = url.split("\\.");
+		if (ArrayUtils.isEmpty(arr)) {
+			logger.error("该URL中不包含文件名");
+			return null;
+		}
+		return arr[arr.length - 1];
+	}
 	
 	/**
 	 * 获取HTML字符串
@@ -294,7 +343,7 @@ public class RegexUtil {
 	}
 	
 	/**
-	 * 根据给定的url从服务器获取图片，并保存在指定位置。注意，指定目录必须存在。<br>
+	 * 根据给定的url从服务器获取图片，并保存在指定位置。<br>
 	 * 
 	 * @param picUrl
 	 * @param savePoint
@@ -303,10 +352,11 @@ public class RegexUtil {
 	public static void savePicToLocal(String picUrl, String savePoint) throws Exception {
 		BufferedOutputStream bufferedOut = null;
 		BufferedInputStream bufferedIn = null;
+		File file = null;
 		// 这个 try 块只是为了关闭资源
 		try {
 			// IO
-			File file = new File(savePoint);
+			file = new File(savePoint);
 			File parent = file.getParentFile();
 			if (parent != null && !parent.exists()) {
 				parent.mkdirs();
@@ -328,13 +378,14 @@ public class RegexUtil {
 				bufferedOut.write(container, 0, lengthOfReadByte);
 			}
 			bufferedOut.flush();
-		} finally {
-			if (bufferedIn != null) {
-				bufferedIn.close();
-			}
-			if (bufferedOut != null) {
-				bufferedOut.close();
-			}
+			System.out.println(savePoint+" 保存成功");
+		}catch(MalformedURLException e){
+			System.err.println("此url无法访问："+picUrl+"\r\n文件"+savePoint+"已删除");
+			file.delete();
+		}
+		finally {
+			IOUtils.closeQuietly(bufferedIn);
+			IOUtils.closeQuietly(bufferedOut);
 		}
 	}
 	/**

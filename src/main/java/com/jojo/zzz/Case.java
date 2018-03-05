@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,8 +16,13 @@ import java.util.zip.ZipFile;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
+
+import com.jojo.util.RegexUtil;
 
 public class Case {
+	
 	/**
 	 * 将《棚车少年》压缩包，读至TXT文档 <br>
 	 * 这是2017年最后一段代码，当前时间是21:44
@@ -113,5 +119,41 @@ public class Case {
 			if (zipFile != null)
 				zipFile.close();
 		}
+	}
+	
+	/**
+	 * 从海贼小站获取漫画资源<br>
+	 * 这个网站没有使用ajax懒加载之类的技术。图片都是一次性全部加载的，<br>
+	 * 所以程序通过访问网页的url可以获取全部源代码，然后提取img标签保存图片就好了。<br>
+	 * 这次用jsoup
+	 * 
+	 * 格式的话已经清楚了https://one-piece.cn/post/10893
+	 * 那么，从10800开始就好。
+	 * @throws Exception 
+	 * 
+	 */
+	public static void getOnePieceManga() throws Exception {
+		String baseUrl = "https://one-piece.cn/post/";
+		String baseSavePath = "D:\\Workspace\\test\\1";
+
+		for (int i = 10860; i < 10896; i++) {
+			System.out.println("开始处理" + i);
+			String url = baseUrl + i;
+			org.jsoup.nodes.Document document = Jsoup.parse(new URL(url), 10 * 1000);
+			
+			String title = document.title().replaceAll("海贼王 ", "").replaceAll("丨海贼小站", "").replaceAll(":", " ");
+			String savePath = baseSavePath + File.separator + title;
+
+			Elements s = document.getElementsByTag("img");
+			int count = 1;
+			for (org.jsoup.nodes.Element temp : s) {
+				String picUrl = temp.attr("src");
+				RegexUtil.savePicToLocal(picUrl, savePath + File.separator + (count++) + ".jpg");
+			}
+		}
+	}
+	
+	public static void main(String[] args) throws Exception {
+		getOnePieceManga();
 	}
 }
