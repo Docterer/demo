@@ -1,5 +1,9 @@
 package com.jojo.util;
 
+import static com.jojo.util.arg.HttpConstant.OK;
+import static com.jojo.util.arg.HttpConstant.OTHER_IO_EXCEPTION;
+import static com.jojo.util.arg.HttpConstant.READ_TIMEOUT;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -66,58 +70,6 @@ import com.jojo.util.arg.HttpResult;
 
 public class HttpClientUtil {
 
-	/************************ 常量区 *****************************/
-
-	/**
-	 * 请求成功
-	 */
-	public static final int OK = 200;
-
-	public static final int NOT_MODIFIED = 304;
-
-	public static final int BAD_REQUEST = 400;
-
-	public static final int NOT_AUTHORIZED = 401;
-
-	public static final int FORBIDDEN = 403;
-
-	public static final int NOT_FOUND = 404;
-
-	public static final int NOT_ACCEPTABLE = 406;
-
-	public static final int INTERNAL_SERVER_ERROR = 500;
-
-	public static final int OTHER_IO_EXCEPTION = 498;
-
-	public static final int READ_TIMEOUT = 499;
-
-	public static final int BAD_GATEWAY = 502;
-
-	public static final int SERVICE_UNAVAILABLE = 503;
-
-	public static final int TIME_OUT = 60000;
-
-	/**
-	 * 图片文件
-	 */
-	public static final String FILE_TYPE_IMAGE = "1";
-	/**
-	 * 视频文件
-	 */
-	public static final String FILE_TYPE_VEDIO = "2";
-	/**
-	 * 音频文件
-	 */
-	public static final String FILE_TYPE_AUDIO = "3";
-	/**
-	 * 安装文件
-	 */
-	public static final String FILE_TYPE_SETUP = "4";
-	/**
-	 * 压缩文件
-	 */
-	public static final String FILE_TYPE_COMPRESS = "5";
-	
 	/****************************** 常用对象 ******************************/
 	private static Logger logger = LoggerFactory.getLogger(HttpClientUtil.class);
 
