@@ -183,19 +183,13 @@ public class FileUtil {
 	}
 
 	/**
-	 * 根据url，将文件保存至本地
+	 * 根据url，将数据保存至本地
 	 * 
 	 * @param url
 	 * @param fileName
 	 * @throws IOException
 	 */
 	public static void createNewFileFromInternet(String url, String fileName) throws IOException {
-		// 检查url是否代表文件
-		String suffix = RegexUtil.getSuffixFromUrl(url);
-		if (StringUtils.isBlank(suffix)) {
-			logger.error("此URL指向的不是文件");
-			return;
-		}
 		// 创建文件
 		File file = new File(fileName);
 		Files.createParentDirs(file);
@@ -207,7 +201,7 @@ public class FileUtil {
 			return;
 		}
 		// 保存数据
-		byte[] arr = IOUtils.toByteArray(new URL("url"));
+		byte[] arr = IOUtils.toByteArray(new URL(url));
 		Files.write(arr, file);
 		logger.error(fileName + "数据填充完毕");
 	}

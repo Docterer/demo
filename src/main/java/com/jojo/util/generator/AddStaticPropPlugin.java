@@ -1,4 +1,4 @@
-package com.jojo.util.generator.plugin;
+package com.jojo.util.generator;
 
 import java.util.List;
 
