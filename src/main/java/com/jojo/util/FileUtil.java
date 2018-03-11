@@ -2,10 +2,12 @@ package com.jojo.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -20,7 +22,9 @@ import com.google.common.io.Files;
 
 public class FileUtil {
 
-	public static final String BASE_SAVE_DIRECTORY = "D:\\Workspace\\test\\";
+	public static final String BASE_SAVE_DIRECTORY = "D:\\Workspace\\test\\1\\";
+
+	public static final String CHARSET_UTF_8 = "UTF-8";
 
 	private static Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
@@ -33,7 +37,7 @@ public class FileUtil {
 	 * @param regexArray
 	 *            正则表达式数组
 	 */
-	public static void fileRename(File fileDirectory, String[] regexArray) {
+	public static void fileRename(File fileDirectory, String... regexArray) {
 		if (ArrayUtils.isEmpty(regexArray) || fileDirectory == null) {
 			logger.error("参数不得为空");
 			return;
@@ -200,10 +204,68 @@ public class FileUtil {
 			logger.error(fileName + "文件创建失败");
 			return;
 		}
+
 		// 保存数据
 		byte[] arr = IOUtils.toByteArray(new URL(url));
 		Files.write(arr, file);
 		logger.error(fileName + "数据填充完毕");
 	}
 
+	/**
+	 * 过滤windows环境下的无效字符
+	 * 
+	 * @param fileName
+	 * @return
+	 */
+	public static String filterInvalidCharacter(String fileName) {
+		if (StringUtils.contains(fileName, "\\")) {
+			fileName = fileName.replaceAll("\\", " ");
+		}
+		if (StringUtils.contains(fileName, "/")) {
+			fileName = fileName.replaceAll("/", " ");
+		}
+		if (StringUtils.contains(fileName, ":")) {
+			fileName = fileName.replaceAll(":", " ");
+		}
+		if (StringUtils.contains(fileName, "*")) {
+			fileName = fileName.replaceAll("*", " ");
+		}
+		if (StringUtils.contains(fileName, "?")) {
+			fileName = fileName.replaceAll("?", " ");
+		}
+		if (StringUtils.contains(fileName, "\"")) {
+			fileName = fileName.replaceAll("\"", " ");
+		}
+		if (StringUtils.contains(fileName, "<")) {
+			fileName = fileName.replaceAll("<", " ");
+		}
+		if (StringUtils.contains(fileName, ">")) {
+			fileName = fileName.replaceAll(">", " ");
+		}
+		if (StringUtils.contains(fileName, "|")) {
+			fileName = fileName.replaceAll("|", " ");
+		}
+		return fileName;
+	}
+
+	/**
+	 * 读取
+	 * @param filePath
+	 * @return
+	 * @throws Exception 
+	 */
+	public static String getContentFromFile(String filePath) throws Exception {
+		File file = new File(filePath);
+		if(!file.exists()) {
+			logger.error("指定文件不存在");
+			return null;
+		}
+		BufferedReader reader = Files.newReader(file, Charset.forName(CHARSET_UTF_8));
+		return IOUtils.toString(reader);
+	}
+	
+	
+	public static void main(String[] args) {
+		
+	}
 }

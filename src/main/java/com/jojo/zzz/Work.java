@@ -1,7 +1,8 @@
 package com.jojo.zzz;
 
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
+import java.io.File;
+
+import com.jojo.util.FileUtil;
 
 /**
  * 开干
@@ -11,13 +12,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
  */
 public class Work {
 
-	public static void main(String[] args) {
-		System.getProperties().setProperty("webdriver.chrome.driver", "D:\\Workspace\\tools\\chromeDriver\\chromedriver.exe");
+	public static void main(String[] args) throws Exception {
 		
-		WebDriver webDriver = new ChromeDriver();  
-		webDriver.get("http://hanhuazu.cc/cartoon/post?id=2292");  
-		String responseBody = webDriver.getPageSource();  
-		System.out.println(responseBody);  
-		webDriver.close();  
+		FileUtil.fileRename(new File("D:\\Workspace\\test\\1"), "漢化組\\.cc");
 	}
 }

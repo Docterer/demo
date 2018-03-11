@@ -19,7 +19,7 @@ import org.dom4j.io.SAXReader;
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
 
-import com.jojo.util.RegexUtil;
+import com.jojo.util.FileUtil;
 
 public class Case {
 	
@@ -148,12 +148,12 @@ public class Case {
 			int count = 1;
 			for (org.jsoup.nodes.Element temp : s) {
 				String picUrl = temp.attr("src");
-				RegexUtil.savePicToLocal(picUrl, savePath + File.separator + (count++) + ".jpg");
+				FileUtil.createNewFileFromInternet(picUrl, savePath + File.separator + (count++) + ".jpg");
 			}
 		}
 	}
 	
 	public static void main(String[] args) throws Exception {
-		getOnePieceManga();
+		
 	}
 }
